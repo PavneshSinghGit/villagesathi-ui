@@ -1,0 +1,730 @@
+/* --- 0. GLOBAL VARIABLES & ANIMATIONS --- */
+:root {
+    --gov-navy: #003366;
+    --gov-blue: #00509d;
+    --gov-green: #198754;
+    --gov-orange: #ff9933;
+    --text-dark: #1e293b;
+    --bg-light: #f8fafc;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.text-success {
+    color: var(--gov-navy) !important;
+}
+
+.btn-success {
+    color: #fff5eb !important;
+    background-color: var(--gov-navy) !important;
+}
+
+/* --- 1. HERO SECTION --- */
+.hero-section {
+    padding: 80px 0;
+    border-bottom: 5px solid var(--gov-orange);
+    background: linear-gradient(180deg, #ffffff 0%, #f0f4f8 100%);
+    background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+}
+
+.gov-badge {
+    display: inline-block;
+    background: #eef2f7;
+    padding: 8px 20px;
+    border-radius: 50px;
+    border-left: 4px solid var(--gov-navy);
+}
+
+.badge-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gov-navy);
+    text-transform: uppercase;
+}
+
+.hero-title {
+    color: var(--gov-navy);
+    letter-spacing: -1px;
+}
+
+.text-accent {
+    color: var(--gov-orange);
+}
+
+.btn-gov-primary {
+    background-color: var(--gov-navy);
+    color: white !important;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-gov-primary:hover {
+    background-color: var(--gov-blue);
+    transform: translateY(-2px);
+}
+
+.btn-gov-outline {
+    border: 2px solid var(--gov-navy);
+    color: var(--gov-navy);
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+/* --- 2. ABOUT THE MISSION --- */
+.section-title {
+    font-weight: 800;
+    color: var(--gov-navy);
+}
+
+.section-title span {
+    color: var(--gov-green);
+}
+
+.check-icon {
+    color: var(--gov-green);
+}
+
+.gov-image-container {
+    position: relative;
+    padding: 10px;
+}
+
+.floating-stat {
+    position: absolute;
+    bottom: 20px;
+    left: -10px;
+    background: white;
+    padding: 15px 25px;
+    border-left: 5px solid var(--gov-green);
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-number {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--gov-green);
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+/* --- 3. HOW IT WORKS --- */
+.how-it-works {
+    background-color: var(--bg-light);
+}
+
+.step-card {
+    background: white;
+    padding: 40px 30px;
+    border-bottom: 3px solid #e2e8f0;
+    transition: border-color 0.3s;
+}
+
+.step-card:hover {
+    border-bottom-color: var(--gov-orange);
+}
+
+.step-num {
+    font-size: 45px;
+    font-weight: 800;
+    color: #dee2e6;
+    line-height: 1;
+    margin-bottom: 15px;
+}
+
+/* --- 4. SERVICES GRID --- */
+.service-card {
+    transition: all 0.3s ease;
+    border-top: 4px solid #dee2e6 !important;
+}
+
+.service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+.icon-circle {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 24px;
+}
+
+/* Service Box Colors */
+.border-top-blue {
+    border-top-color: #0d6efd !important;
+}
+
+.border-top-green {
+    border-top-color: var(--gov-green) !important;
+}
+
+.border-top-orange {
+    border-top-color: var(--gov-orange) !important;
+}
+
+.border-top-red {
+    border-top-color: #dc3545 !important;
+}
+
+.border-top-teal {
+    border-top-color: #20c997 !important;
+}
+
+.border-top-navy {
+    border-top-color: var(--gov-navy) !important;
+}
+
+.bg-blue-soft {
+    background-color: #e7f1ff;
+}
+
+.bg-green-soft {
+    background-color: #e1f2e9;
+}
+
+.bg-orange-soft {
+    background-color: #fff5eb;
+}
+
+.bg-red-soft {
+    background-color: #fceaea;
+}
+
+.bg-teal-soft {
+    background-color: #e9faf4;
+}
+
+.bg-navy-soft {
+    background-color: #e6ebf0;
+}
+
+.text-blue {
+    color: #0d6efd;
+}
+
+.text-green {
+    color: var(--gov-green);
+}
+
+.text-orange {
+    color: var(--gov-orange);
+}
+
+.text-red {
+    color: #dc3545;
+}
+
+.text-teal {
+    color: #20c997;
+}
+
+.text-navy {
+    color: var(--gov-navy);
+}
+
+/* --- 5. STATISTICS STRIP --- */
+.stats-strip {
+    background-color: var(--gov-navy);
+    color: white;
+    background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%);
+    background-size: 4px 4px;
+}
+
+/* --- 6. CALL TO ACTION (CTA) --- */
+.cta-box {
+    background: linear-gradient(135deg, var(--gov-navy) 0%, var(--gov-blue) 100%);
+    color: white;
+}
+
+.btn-gov-accent {
+    background-color: var(--gov-orange);
+    color: white;
+    border-radius: 0 4px 4px 0;
+    transition: background 0.3s;
+}
+
+.btn-gov-accent:hover {
+    background-color: #e67e22;
+    color: white;
+}
+
+/* --- 7. FOOTER --- */
+.footer-gov {
+    background-color: #001a33;
+    border-top: 4px solid var(--gov-orange);
+    background-image: url(https://www.transparenttextures.com/patterns/cubes.png) !important;
+}
+
+.footer-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-block;
+    padding: 5px 0;
+}
+
+.footer-links a:hover {
+    color: var(--gov-orange);
+    padding-left: 5px;
+}
+
+.social-node {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.social-node:hover {
+    background: var(--gov-orange);
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* --- 8. RESPONSIVE --- */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 40px 0;
+    }
+
+    .floating-stat {
+        position: static;
+        margin-top: 20px;
+    }
+
+    .display-5 {
+        font-size: 2.2rem;
+    }
+
+    .btn-lg {
+        width: 100%;
+    }
+}
+
+/* --- ABOUT PAGE GLOBAL --- */
+.about-wrapper {
+    overflow-x: hidden;
+    background-color: #ffffff;
+}
+
+/* --- 1. HERO SECTION --- */
+.about-hero {
+    background: linear-gradient(135deg, #003366 0%, #00509d 100%);
+    position: relative;
+    padding-bottom: 120px !important;
+    /* Space for wave */
+}
+
+.about-hero h1 {
+    letter-spacing: -1px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hero-wave {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    line-height: 0;
+}
+
+/* --- 2. IMPACT STATS --- */
+.mt-n5 {
+    margin-top: -80px !important;
+}
+
+.z-index-2 {
+    z-index: 2;
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+    border-bottom: 4px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-10px);
+    border-bottom-color: var(--gov-green);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stat-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+/* --- 3. CONTENT SECTION --- */
+.animate-left {
+    animation: fadeInLeft 1s ease-out;
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.floating-img {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+/* --- 4. VISION & MISSION CARDS --- */
+.mission-bg-icon {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    opacity: 0.1;
+    transform: rotate(-15deg);
+    pointer-events: none;
+}
+
+.card .z-index-1 {
+    position: relative;
+    z-index: 1;
+}
+
+/* --- 5. CORE VALUES --- */
+.shadow-inner {
+    box-shadow: inset 0 2px 15px rgba(0, 0, 0, 0.05);
+}
+
+.value-box {
+    transition: all 0.3s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.value-box:hover {
+    background-color: #f8fafc !important;
+    border-color: var(--gov-navy);
+}
+
+.value-box svg {
+    transition: transform 0.3s ease;
+}
+
+.value-box:hover svg {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* --- RESPONSIVE ADJUSTMENTS --- */
+@media (max-width: 768px) {
+    .about-hero {
+        padding-top: 50px !important;
+        padding-bottom: 80px !important;
+    }
+
+    .display-3 {
+        font-size: 2.5rem;
+    }
+
+    .mt-n5 {
+        margin-top: -50px !important;
+    }
+
+    .stat-card h2 {
+        font-size: 1.5rem;
+    }
+}
+/* Stats Section Styling */
+.stats-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* CTA Gradient Card */
+.cta-gradient-card {
+  background: linear-gradient(135deg, #8779cd 0%, #9896d6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cta-pattern {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0.1;
+  background-image: radial-gradient(#ffffff 0.5px, transparent 0.5px);
+  background-size: 20px 20px;
+  z-index: 1;
+}
+
+/* Input Group Hover Effects */
+.cta-gradient-card .btn-warning {
+  background-color: #facc15;
+  border-color: #facc15;
+  color: #166534;
+}
+
+.cta-gradient-card .btn-warning:hover {
+  background-color: #fef08a;
+  transform: translateX(3px);
+}
+
+.transition-hover {
+  transition: all 0.3s ease;
+}
+
+.rounded-5 {
+  border-radius: 2rem !important;
+}
+
+/* Text spacing */
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
+/* --- CONTACT PAGE STYLES --- */
+
+.contact-page {
+    background-color: #ffffff;
+}
+
+/* 1. Contact Info Card (Left Side) */
+.contact-info-card {
+    background: linear-gradient(135deg, #003366 0%, #003366 100%);
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+.icon-box-white {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: white;
+}
+
+.social-link {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    background: #ffffff;
+    color: var(--gov-navy) !important;
+    transform: translateY(-5px);
+}
+
+/* 2. Contact Form Card (Right Side) */
+.contact-form-card {
+    background-color: #cbd5e1;
+    border: 1px solid #f1f5f9 !important;
+}
+
+.form-control-lg,
+.form-select-lg {
+    font-size: 1rem;
+    padding: 0.8rem 1.2rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #ffffff !important;
+    border: 1px solid var(--gov-navy) !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 51, 102, 0.1);
+    outline: none;
+}
+
+/* 3. Button Interaction */
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: var(--gov-navy) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 51, 102, 0.3) !important;
+}
+
+/* 4. Alerts */
+.alert {
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* 5. Responsive Tweaks */
+@media (max-width: 991px) {
+    .contact-info-card {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-4 {
+        font-size: 2.5rem;
+    }
+
+    .contact-form-card {
+        padding: 1.5rem !important;
+    }
+}
+
+/* --- SERVICES PAGE STYLES --- */
+
+.services-page {
+    background-color: #fcfdfe;
+    /* Faint blue-tinted white for freshness */
+}
+
+/* 1. Header & Underline */
+.ls-2 {
+    letter-spacing: 2px;
+}
+
+.underline {
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gov-green), var(--gov-orange));
+    border-radius: 2px;
+}
+
+/* 2. Premium Service Cards */
+.service-card-premium {
+    background: #ffffff;
+    border: 1px solid #f1f5f9 !important;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-card-premium:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 51, 102, 0.08) !important;
+    border-color: rgba(25, 135, 84, 0.2) !important;
+}
+
+/* 3. Icon Circles with Soft Backgrounds */
+.icon-circle {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    transition: transform 0.3s ease;
+}
+
+.service-card-premium:hover .icon-circle {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Background Variations */
+.bg-warning-light {
+    background-color: #fff9db;
+}
+
+.bg-primary-light {
+    background-color: #e7f5ff;
+}
+
+.bg-success-light {
+    background-color: #ebfbee;
+}
+
+.bg-danger-light {
+    background-color: #fff5f5;
+}
+
+.bg-info-light {
+    background-color: #e3fafc;
+}
+
+.bg-secondary-light {
+    background-color: #f1f3f5;
+}
+
+/* 4. Interactive Links (Hover Arrow) */
+.hover-arrow {
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.transition-icon {
+    transition: transform 0.3s ease;
+}
+
+.service-card-premium:hover .transition-icon {
+    transform: translateX(8px);
+}
+
+/* 5. CTA Banner */
+.cta-banner {
+    background: linear-gradient(135deg, #003366 0%, #003366 100%);
+    border: none;
+}
+
+.cta-banner h3 {
+    letter-spacing: -0.5px;
+}
+
+/* 6. Responsive Fixes */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 2rem;
+    }
+
+    .service-card-premium {
+        padding: 1.5rem !important;
+    }
+}

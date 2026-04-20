@@ -1,0 +1,156 @@
+/* --- BLOG PAGE GLOBAL --- */
+.blogs-page {
+    background-color: #f4f7f6; /* Soft paper-like background */
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+/* --- 1. BLOG HERO --- */
+.blog-hero {
+    background: linear-gradient(135deg, #003366 0%, #00509d 100%);
+    color: white !important;
+    padding: 100px 0 60px;
+    border-bottom: 6px solid #ff9933; /* Saffron Line */
+}
+
+.blog-hero h1 {
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* --- 2. BLOG CARDS (LIST VIEW) --- */
+.blog-card {
+    background: #ffffff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e2e8f0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 51, 102, 0.08) !important;
+    border-color: #198754 !important;
+}
+
+.blog-card .img-fluid {
+    height: 100%;
+    min-height: 220px;
+    object-fit: fill !important;
+    transition: transform 0.5s ease;
+}
+
+.blog-card:hover .img-fluid {
+    transform: scale(1.05);
+}
+
+.card-title-hover {
+    font-size: 1.4rem;
+    color: #1e293b;
+    line-height: 1.3;
+    margin-bottom: 12px;
+}
+
+.blog-card:hover .card-title-hover {
+    color: #198754;
+}
+
+/* --- 3. BADGES & LABELS --- */
+.badge.bg-success-subtle {
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.text-muted.small {
+    color: #64748b !important;
+}
+
+/* --- 4. SIDEBAR WIDGETS --- */
+.blogs-page .card {
+    border-radius: 12px;
+}
+
+.input-group.bg-light {
+    border: 1px solid #e2e8f0;
+}
+
+.hover-link {
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.hover-link:hover {
+    background-color: #ecfdf5;
+    color: #198754 !important;
+    font-weight: 600;
+}
+
+/* --- 5. NEWSLETTER WIDGET --- */
+.blogs-page .bg-success.text-white {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+    border: none;
+}
+
+.blogs-page .btn-light {
+    border: none;
+    color: #198754;
+    transition: background 0.3s;
+}
+
+.blogs-page .btn-light:hover {
+    background-color: #f1f5f9;
+    color: #003366;
+}
+
+/* --- 6. ANIMATIONS --- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.blogs-page .col-12 {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+/* --- 7. RESPONSIVE --- */
+@media (max-width: 991px) {
+    .blog-card .row.g-0 {
+        flex-direction: column;
+    }
+    .blog-card .img-fluid {
+        height: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .blog-hero { padding: 60px 0 40px; }
+    .display-4 { font-size: 2.2rem; }
+    .card-title-hover { font-size: 1.2rem; }
+}
+/* Blog Hero Gradient overlay */
+.bg-gradient-dark {
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+}
+
+.blog-main-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.blog-main-content p {
+    margin-bottom: 1.5rem;
+}
+
+/* SEO Friendly responsiveness */
+@media (max-width: 768px) {
+    .blog-detail-page .display-5 {
+        font-size: 1.8rem;
+    }
+}

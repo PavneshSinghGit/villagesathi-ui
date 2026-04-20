@@ -1,0 +1,26 @@
+/* Reset + Base */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f8f9fa;
+}
+
+/* Common Utilities */
+.text-primary {
+  color: #0d6efd;
+}
+
+.container {
+  width: 100%;           /* 1126px hata kar 100% karein */
+  max-width: 100%;
+}
+
+/* Card Styling */
+.card-custom {
+  border-radius: 12px;
+  transition: 0.3s;
+}
+
+.card-custom:hover {
+  transform: translateY(-5px);
+}
