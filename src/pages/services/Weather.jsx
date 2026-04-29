@@ -30,9 +30,10 @@ function Weather() {
 
   return (
     <div className="weather-page py-5 bg-light min-vh-100">
-      <Helmet>
-        <title>Weather Updates | Real-time Forecast | VillageSathi</title>
-      </Helmet>
+        <Helmet>
+          <title>Weather Updates | Real-time Forecast | VillageSathi</title>
+          <meta name="description" content="Get real-time weather updates and forecasts for your village or district." />
+        </Helmet>
 
       <div className="container">
         {/* --- TOP SECTION: SEARCH & CURRENT WEATHER --- */}

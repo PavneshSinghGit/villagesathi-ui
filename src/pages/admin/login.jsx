@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../api/authApi";
-import "../../styles/loginStyles.css"; 
-
+import "../../styles/loginStyles.css";
+import { Helmet } from "react-helmet-async";
 function Login() {
   const [mobileNo, setMobileNo] = useState("");
   const [password, setPassword] = useState("");
@@ -32,14 +32,14 @@ function Login() {
       // Aapke API structure ke mutabiq: res.success aur res.data
       if (res && res.success === true) {
         const userData = res.data;
-        
+
         // Yahan 'token' nikal rahe hain. Agar API 'res.token' mein de rahi hai 
         // ya 'res.data.token' mein, uske hisaab se adjust karein.
-        const token = res.token || userData.token || "manual-auth-token"; 
+        const token = res.token || userData.token || "manual-auth-token";
 
         // Role Validation: res.data.roleId === 1
         if (userData && Number(userData.roleId) === 1) {
-          
+
           // 1. Data Store Karein
           localStorage.setItem("token", token);
           localStorage.setItem("user", JSON.stringify(userData));
@@ -50,7 +50,7 @@ function Login() {
           setTimeout(() => {
             navigate("/admin/dashboard");
           }, 1000);
-          
+
         } else {
           setErrorMsg("Access Denied: You are not authorized as an admin.");
         }
@@ -68,6 +68,10 @@ function Login() {
 
   return (
     <div className="login-container">
+      <Helmet>
+        <title>Admin Login | VillageSathi</title>
+        <meta name="description" content="Login to your VillageSathi admin panel to manage and oversee the platform's operations." />
+      </Helmet>
       <div className="login-card">
         <div className="login-header">
           <img

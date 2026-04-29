@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { Helmet } from "react-helmet-async";
 function Dashboard() {
   const navigate = useNavigate();
   const [adminName, setAdminName] = useState("");

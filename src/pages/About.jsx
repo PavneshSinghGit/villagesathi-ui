@@ -14,7 +14,8 @@ function About() {
   return (
     <div className="about-wrapper">
       <Helmet>
-        <title>Our Story | VillageSathi — Bridging the Rural-Digital Divide</title>
+        <title>About Us | VillageSathi - Empowering Rural India</title>
+        <meta name="description" content="Discover the mission, vision, and impact of VillageSathi in empowering rural India through digital innovation." />
       </Helmet>
 
       {/* --- 1. HERO SECTION --- */}

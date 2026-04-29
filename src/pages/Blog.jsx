@@ -1,26 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { Calendar, User, ArrowRight, Tag, Search, MessageCircle } from "lucide-react";
+import { Calendar, User, ArrowRight, Tag, Search, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+
+// Same as Admin, plus "All" for filtering
+const CATEGORIES = ["All", "Agriculture", "Government Schemes", "Rural Development", "News", "General"];
 
 function Blog() {
   const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get("https://localhost:7092/api/Blogs");
-        // API response keys check karein (blogId, title etc small case mein hain)
-        setPosts(res.data.data);
-        setFilteredPosts(res.data.data);
+        const API_BASE_URL = import.meta.env.VITE_API_URL;
+        const res = await axios.get(`${API_BASE_URL}/Blogs`);
+        const allData = res.data.data || [];
+        // Only display active posts to the public
+        setPosts(allData.filter(p => p.isActive === true || p.IsActive === true));
       } catch (err) {
-        console.error("Error fetching blogs", err);
+        console.error("Fetch Error:", err);
+        setError("Unable to load articles at this moment.");
       } finally {
         setLoading(false);
       }
@@ -28,174 +33,162 @@ function Blog() {
     fetchBlogs();
   }, []);
 
-  // Search Logic
-  const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-    const filtered = posts.filter(post =>
-      post.title.toLowerCase().includes(query) ||
-      post.shortDescription.toLowerCase().includes(query)
-    );
-    setFilteredPosts(filtered);
-  };
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      const title = (post.title || post.Title || "").toLowerCase();
+      const desc = (post.shortDescription || post.ShortDescription || "").toLowerCase();
+      const category = post.category || post.Category || "General";
 
-  // Category Filter Logic
-  const filterByCategory = (category) => {
-    if (category === "All") {
-      setFilteredPosts(posts);
-    } else {
-      const filtered = posts.filter(post => post.category === category);
-      setFilteredPosts(filtered);
-    }
+      const matchesSearch = title.includes(searchQuery.toLowerCase()) || desc.includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "All" || category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [posts, searchQuery, selectedCategory]);
+
+  const getImageUrl = (url) => {
+    if (!url) return "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&q=80&w=500";
+    if (url.startsWith("http")) return url;
+    return `${import.meta.env.VITE_IMAGE_URL}/${url.replace(/^\//, '')}`;
   };
 
   if (loading) return (
     <div className="d-flex justify-content-center align-items-center" style={{ height: '60vh' }}>
-      <div className="spinner-border text-success" role="status"></div>
-      <span className="ms-2">Patrika load ho rahi hai...</span>
+      <div className="spinner-grow text-success" role="status"></div>
+      <span className="ms-3 fw-bold">Fetching Journal...</span>
     </div>
   );
 
   return (
-    <div className="blogs-page pb-5 bg-light">
+    <div className="pb-5 bg-light min-vh-100">
       <Helmet>
-        <title>VillageSathi Patrika | Gaon ki Taza Khabar</title>
+        <title>VillageSathi | Rural Insights & News</title>
       </Helmet>
 
-      {/* --- HERO SECTION --- */}
-      <section className="blog-hero py-5 text-white text-center mb-5" style={{ background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1200") center/cover' }}>
+      {/* Hero Section */}
+      <section className="py-5 text-white text-center mb-5"
+        style={{
+          background: 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1200") center/cover',
+          borderRadius: '0 0 40px 40px'
+        }}>
         <div className="container py-4">
-          <h1 className="display-4 fw-bold">VillageSathi Patrika 📰</h1>
-          <p className="lead opacity-75 mx-auto" style={{ maxWidth: '700px' }}>
-            Kheti-baari, sarkari yojana aur gaon ke vikas ki har khabar ab ek hi jagah.
+          <h1 className="display-4 fw-bold text-white">VillageSathi Journal 📰</h1>
+          <p className="lead mx-auto" style={{ maxWidth: '600px' }}>
+            Latest updates on agriculture, rural development, and government schemes.
           </p>
         </div>
       </section>
 
       <div className="container">
         <div className="row g-4">
-
-          {/* --- MAIN BLOG LIST --- */}
-          <div className="col-lg-8">
-            <h3 className="fw-bold mb-4 d-flex align-items-center">
-              <span className="bg-success p-1 rounded me-2" style={{ width: '10px', height: '30px', display: 'inline-block' }}></span>
-              Taza Jankari
-            </h3>
+          {/* Main Content */}
+          <div className="col-lg-8 order-2 order-lg-1">
+            <div className="mb-4 d-flex justify-content-between align-items-center">
+              <h3 className="fw-bold mb-0 border-start border-success border-5 ps-3">{selectedCategory} Articles</h3>
+              <span className="text-muted fw-bold">{filteredPosts.length} Found</span>
+            </div>
 
             <div className="row g-4">
               {filteredPosts.length > 0 ? filteredPosts.map((post) => (
-                <div className="col-12" key={post.blogId}>
-                  <div className="card blog-card border-0 shadow-sm overflow-hidden rounded-4 h-100 transition-hover">
+                <div className="col-12" key={post.blogId || post.BlogId}>
+                  <div className="card border-0 shadow-sm overflow-hidden rounded-4 h-100 transition-hover">
                     <div className="row g-0">
                       <div className="col-md-4">
                         <img
-                          src={post.imageUrl.startsWith("http") ? post.imageUrl : `https://localhost:7092${post.imageUrl}`}
-                          className="img-fluid h-100 object-fit-cover"
-                          alt={post.title}
-                          style={{ minHeight: '200px' }}
+                          src={getImageUrl(post.imageUrl || post.ImageUrl)}
+                          alt="Cover"
+                          className="w-100 h-100"
+                          style={{ objectFit: 'cover', minHeight: '220px' }}
                         />
                       </div>
-                      <div className="col-md-8">
-                        <div className="card-body p-4">
-                          <div className="d-flex justify-content-between mb-2">
-                            <span className="badge bg-success-subtle text-success rounded-pill px-3">
-                              <Tag size={12} className="me-1" /> {post.category || "General"}
-                            </span>
-                            <small className="text-muted d-flex align-items-center">
-                              <Calendar size={14} className="me-1" />
-                              {new Date(post.createdDate).toLocaleDateString('hi-IN')}
-                            </small>
-                          </div>
-                          <h4 className="fw-bold mb-2">{post.title}</h4>
-                          <p className="text-muted small mb-4 line-clamp-2">{post.shortDescription}</p>
+                      <div className="col-md-8 p-4 d-flex flex-column">
+                        <div className="mb-2 d-flex gap-2">
+                          <span className="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                            <Tag size={12} className="me-1" /> {post.category || post.Category || "General"}
+                          </span>
+                        </div>
+                        <h4 className="fw-bold">{post.title || post.Title}</h4>
+                        <p className="text-muted small line-clamp-2">{post.shortDescription || post.ShortDescription}</p>
 
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div className="d-flex align-items-center">
-                              {/* Icon Container */}
-                              <div
-                                className="bg-success bg-opacity-10 d-flex align-items-center justify-content-center rounded-circle me-2"
-                                style={{ width: '32px', height: '32px' }}
-                              >
-                                {/* FontAwesome Icon */}
-                                <i className="fa fa-user text-success" style={{ fontSize: '14px' }}></i>
-                              </div>
-
-                              {/* Author Name */}
-                              <span className="small fw-bold text-dark">
-                                {post.authorName || "Admin"}
-                              </span>
-                            </div>
-                            <Link to={`/BlogDetail/${post.slug}`} className="btn btn-link text-success p-0 fw-bold text-decoration-none">
-                              Read More <ArrowRight size={16} className="ms-1" />
-                            </Link>
+                        <div className="mt-auto d-flex justify-content-between align-items-center">
+                          <div className="small text-dark fw-bold">
+                            <User size={14} className="text-success me-1" /> {post.authorName || post.AuthorName}
                           </div>
+                          <Link to={`/BlogDetail/${post.slug || post.Slug}`} className="btn btn-success btn-sm rounded-pill px-4">
+                            Read Article <ArrowRight size={14} className="ms-1" />
+                          </Link>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               )) : (
-                <div className="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
-                  <h5>Sorry no data found!</h5>
-                  <button className="btn btn-success mt-2" onClick={() => filterByCategory("All")}>See All Articles</button>
+                <div className="text-center py-5">
+                  <Search size={48} className="text-muted opacity-25 mb-3" />
+                  <h4>No matches found</h4>
+                  <p className="text-muted">Try clearing filters or changing your search term.</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* --- SIDEBAR --- */}
-          <div className="col-lg-4">
-            {/* Search Widget */}
+          {/* Sidebar */}
+          <div className="col-lg-4 order-1 order-lg-2">
             <div className="card border-0 shadow-sm p-4 rounded-4 mb-4">
               <h6 className="fw-bold mb-3">Search Article</h6>
-              <div className="input-group bg-light rounded-pill px-3 py-1 align-items-center">
-                <Search size={18} className="text-muted" />
-                <div class="row">
-                  <input type="text" className="form-control border-0 bg-transparent shadow-none"
-                    placeholder="Search here..." value={searchQuery} onChange={handleSearch}
-                  />
-                </div>
+
+              {/* Border aur Padding yahan control ho rahi hai */}
+              <div
+                className="input-group align-items-center px-3"
+                style={{
+                  borderRadius: '50px',
+                  border: '2px solid #dee2e6', // Proper border color aur thickness
+                  backgroundColor: '#f8f9fa'    // Light background
+                }}
+              >
+                <Search size={20} className="text-muted" />
+
+                <input
+                  type="text"
+                  className="form-control border-1 bg-transparent py-3"
+                  placeholder="Type to search..."
+                  value={searchQuery}
+                  style={{
+                    fontSize: '1.1rem',
+                    boxShadow: 'none', // Blue glow hatane ke liye
+                    paddingLeft: '10px',
+                    width: '320px'  
+                  }}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
             </div>
 
-            {/* Categories Widget */}
-            <div className="card border-0 shadow-sm p-4 rounded-4 mb-4">
-              <h6 className="fw-bold mb-3">Categories</h6>
-              <ul className="list-unstyled mb-0">
-                {["All", "Krishi", "Sarkari Yojana", "General"].map((cat, i) => (
-                  <li key={i} className="mb-2">
-                    <button
-                      onClick={() => filterByCategory(cat)}
-                      className="btn btn-link p-0 text-decoration-none text-muted d-flex justify-content-between w-100 hover-link"
-                    >
-                      <span>{cat}</span>
-                      <span className="badge bg-light text-dark rounded-pill">
-                        {cat === "All" ? posts.length : posts.filter(p => p.category === cat).length}
-                      </span>
-                    </button>
-                  </li>
+            <div className="card border-0 shadow-sm p-4 rounded-4 sticky-top" style={{ top: '20px' }}>
+              <h6 className="fw-bold mb-3">Filter by Category</h6>
+              <div className="list-group list-group-flush">
+                {CATEGORIES.map((cat, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`list-group-item list-group-item-action border-0 d-flex justify-content-between align-items-center rounded-3 mb-1 ${selectedCategory === cat ? 'bg-success text-white active' : 'text-muted'}`}
+                  >
+                    <span>{cat}</span>
+                    <span className={`badge rounded-pill ${selectedCategory === cat ? 'bg-white text-success' : 'bg-light text-dark'}`}>
+                      {cat === "All" ? posts.length : posts.filter(p => (p.category || p.Category) === cat).length}
+                    </span>
+                  </button>
                 ))}
-              </ul>
-            </div>
-
-            {/* Newsletter Widget */}
-            <div className="card border-0 shadow-sm p-4 rounded-4 bg-success text-white">
-              <MessageCircle className="mb-3" size={32} />
-              <h5 className="fw-bold">WhatsApp Par Judein</h5>
-              <p className="small opacity-75">Sarkari yojana aur kheti ke naye updates turant pane ke liye hamara group join karein.</p>
-              <a
-                href="https://wa.me/yournumber"
-                target="_blank"
-                rel="noreferrer"
-                className="btn btn-light w-100 fw-bold rounded-pill mt-2"
-              >
-                Group Join Karein
-              </a>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
+      <style>{`
+        .transition-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .transition-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      `}</style>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = "https://localhost:7092/api";
+// Ab ye URL aapki .env file se "https://api.villagesathi.in/api" uthayega
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const loginUser = async (data) => {
   try {

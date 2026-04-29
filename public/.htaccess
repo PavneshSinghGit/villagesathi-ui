@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Agar request kisi real file ya directory ke liye hai, toh usse disturb mat karo
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Baaki saari requests ko index.html par bhej do
+  RewriteRule . /index.html [L]
+</IfModule>

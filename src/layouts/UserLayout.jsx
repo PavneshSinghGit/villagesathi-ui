@@ -1,28 +1,49 @@
 import React from "react";
+import { Outlet } from "react-router-dom"; // Outlet import karna zaroori hai
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-function UserLayout({ children }) {
+const UserLayout = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      {/* Navbar ko 'sticky' ya 'fixed' banane ka option navbar.css mein hai, 
-         isliye yahan extra wrapper ki zarurat nahi hai. 
-      */}
-      <Navbar />
+    <div className="flex flex-col min-h-screen bg-gray-50 selection:bg-warning selection:text-dark">
+      {/* NAVBAR SECTION */}
+      <header className="sticky top-0 z-50 shadow-sm bg-white">
+        <Navbar />
+      </header>
 
-      {/* Main Content Area */}
-      {/* 1. 'mt-navbar' (optional): Agar navbar fixed hai toh margin-top chahiye hoga.
-         2. 'max-w-7xl': Ek standard maximum width set karna desktop ke liye accha rehta hai.
-      */}
-      <main className="flex-grow">
-         <div className="container mx-auto px-4 py-8 max-w-7xl">
-            {children}
-         </div>
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-grow flex flex-col transition-all duration-300 ease-in-out">
+        <div className="container-fluid mx-auto px-4 py-6 md:py-10 max-w-7xl w-100">
+          {/* Ab yahan {children} ki jagah <Outlet /> aayega.
+            Ye automatic handle karega ki Home, About ya Electricity mein se 
+            kaunsa page render karna hai.
+          */}
+          <section className="fade-in-content">
+            <Outlet /> 
+          </section>
+        </div>
       </main>
-      {/* --- FOOTER --- */}
+
+      {/* FOOTER SECTION */}
       <Footer />
+
+      {/* Smooth Transitions & Animations */}
+      <style>{`
+        .fade-in-content {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mobile scroll behavior improvement */
+        html {
+          scroll-behavior: smooth;
+        }
+      `}</style>
     </div>
   );
-}
+};
 
 export default UserLayout;

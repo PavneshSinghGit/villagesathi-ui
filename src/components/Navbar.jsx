@@ -1,101 +1,129 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../styles/navbar.css";
 import logo from "../assets/Images/villagesathi-logo.png";
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
 function Navbar() {
   const location = useLocation();
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
+  const toggleButtonRef = useRef(null);
+  const navbarCollapseRef = useRef(null);
+  const dropdownRef = useRef(null);
 
-  // Helper function to check active route
-  const isActive = (path) => location.pathname === path ? "active-nav-link" : "";
+  // Close mobile menu and dropdown when link is clicked
+  const handleNavLinkClick = () => {
+    if (navbarCollapseRef.current.classList.contains("show")) {
+      toggleButtonRef.current.click();
+    }
+    setIsServicesOpen(false);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsServicesOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const getActiveClass = (path) => 
+    location.pathname === path ? "nav-link active fw-bold text-warning" : "nav-link";
 
   return (
     <>
-      {/* --- OFFICIAL GOVT TOP BAR --- */}
-      <div className="gov-top-bar py-1 d-none d-md-block" style={{ background: "#f8f9fa", borderBottom: "1px solid #ddd", fontSize: "12px" }}>
-        <div className="container d-flex justify-content-between align-items-center">
-          <div className="gov-india-text text-uppercase fw-bold text-secondary">
-            <img src="flag.svg" alt="flag" style={{ height: '10px', marginRight: '5px' }} />
-            भारत सरकार | Government of India
+      {/* --- TOP BAR --- */}
+      <div className="d-none d-md-block bg-light border-bottom py-1">
+        <div className="container d-flex justify-content-between align-items-center" style={{ fontSize: "11px" }}>
+          <div className="text-secondary fw-medium">
+            भारत सरकार | GOVERNMENT OF INDIA
           </div>
-          <div className="gov-links d-flex gap-4">
-            <a href="#main" className="text-decoration-none text-dark">Skip to main content</a>
-            <span className="fw-bold cursor-pointer">A+ A-</span>
-            <span className="lang-toggle fw-bold text-primary cursor-pointer">English | हिंदी</span>
+          <div className="d-flex gap-3 text-secondary">
+            <span>Skip to main content</span>
+            <span>|</span>
+            <span className="cursor-pointer">A+ A A-</span>
           </div>
         </div>
       </div>
 
       {/* --- MAIN NAVBAR --- */}
-      <nav className="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm p-0 border-bottom-orange">
+      <nav className="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-2">
         <div className="container">
-
-          <Link className="navbar-brand d-flex align-items-center py-2" to="/">
-            <img src={logo} alt="VillageSathi Logo" className="logo-img me-2" style={{ height: "50px", transition: "0.3s" }} />
-            <div className="brand-text-wrapper">
-              <span className="brand-main d-block fw-bold" style={{ letterSpacing: "1px", color: "#003366" }}>VILLAGESATHI</span>
-              <span className="brand-sub text-muted" style={{ fontSize: "10px", fontWeight: "600" }}>ग्रामीण सशक्तिकरण की एक पहल</span>
+          <Link className="navbar-brand d-flex align-items-center" to="/home">
+            <img src={logo} alt="VillageSathi Logo" style={{ height: "45px", width: "auto" }} />
+            <div className="ms-2 border-start ps-2 border-2 border-warning text-start">
+              <span className="fw-bold d-block lh-1 mt-1" style={{ color: "#003366", fontSize: "1.2rem", letterSpacing: "1px" }}>
+                VILLAGESATHI
+              </span>
+              <small className="text-muted text-uppercase tracking-tighter" style={{ fontSize: "9px", fontWeight: "600" }}>
+                Digital Rural Empowerment
+              </small>
             </div>
           </Link>
 
-          <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <button 
+            ref={toggleButtonRef}
+            className="navbar-toggler border-0 shadow-none" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation"
+          >
             <span className="navbar-toggler-icon"></span>
           </button>
 
-          <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <ul className="navbar-nav align-items-center">
+          <div className="collapse navbar-collapse justify-content-end" id="navbarNav" ref={navbarCollapseRef}>
+            <ul className="navbar-nav align-items-center gap-1">
               <li className="nav-item">
-                <Link className={`nav-link nav-link-custom ${isActive('/home')}`} to="/home">HOME</Link>
+                <Link onClick={handleNavLinkClick} className={getActiveClass('/home')} to="/home">HOME</Link>
               </li>
+              
               <li className="nav-item">
-                <Link className={`nav-link nav-link-custom ${isActive('/about')}`} to="/about">ABOUT</Link>
+                <Link onClick={handleNavLinkClick} className={getActiveClass('/about')} to="/about">ABOUT</Link>
               </li>
 
-              {/* SERVICES DROPDOWN - MEGA MENU */}
-              <li className="nav-item dropdown has-megamenu">
-                <a
-                  className="nav-link nav-link-custom dropdown-toggle"
-                  href="#"
-                  id="navbarDropdown"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
+              {/* FIXED SERVICES DROPDOWN */}
+              <li 
+                className={`nav-item dropdown ${isServicesOpen ? 'show' : ''}`} 
+                ref={dropdownRef}
+              >
+                <button
+                  className={`nav-link dropdown-toggle border-1 bg-transparent ${location.pathname.includes('/services') ? 'active text-warning fw-bold' : ''}`}
+                  onClick={() => setIsServicesOpen(!isServicesOpen)}
+                  aria-expanded={isServicesOpen}
                 >
                   SERVICES
-                </a>
-
-                <div className="dropdown-menu mega-menu-custom border-0 shadow-lg p-3 animate slideIn" aria-labelledby="navbarDropdown">
-                  <div className="row g-3" style={{ minWidth: '550px' }}>
-                    {[
-                      { to: "/services/Electricity", icon: "⚡", title: "Electricity", desc: "Bills & Status" },
-                      { to: "/services/GovernmentSchemes", icon: "🏛", title: "Govt Schemes", desc: "Benefits & Apply" },
-                      { to: "/services/Weather", icon: "🌦", title: "Weather", desc: "Local Updates" },
-                      { to: "/services/FarmerHelp", icon: "🌾", title: "Farmer Help", desc: "Agri Support" }
-                    ].map((service, index) => (
-                      <div className="col-6" key={index}>
-                        <Link to={service.to} className="dropdown-item service-box d-flex align-items-start p-3 rounded shadow-sm-hover">
-                          <span className="fs-3 me-3">{service.icon}</span>
-                          <div>
-                            <strong className="d-block text-dark">{service.title}</strong>
-                            <span className="small text-muted">{service.desc}</span>
-                          </div>
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                </button>
+                <ul 
+                  className={`dropdown-menu border-0 shadow-lg mt-lg-3 rounded-3 ${isServicesOpen ? 'show' : ''}`}
+                  style={{ display: isServicesOpen ? 'block' : 'none', right: 0 }}
+                >
+                  <li><Link onClick={handleNavLinkClick} className="dropdown-item py-2" to="/services/electricity">⚡ Electricity Status</Link></li>
+                  <li><Link onClick={handleNavLinkClick} className="dropdown-item py-2" to="/services/governmentschemes">🏛 Govt Schemes</Link></li>
+                  <li><Link onClick={handleNavLinkClick} className="dropdown-item py-2" to="/services/weather">🌦 Live Weather</Link></li>
+                  <li><Link onClick={handleNavLinkClick} className="dropdown-item py-2" to="/services/farmerhelp">🌾 Farmer Help</Link></li>
+                </ul>
               </li>
 
               <li className="nav-item">
-                <Link className={`nav-link nav-link-custom ${isActive('/contact')}`} to="/contact">CONTACT</Link>
+                <Link onClick={handleNavLinkClick} className={getActiveClass('/blog')} to="/blog">BLOG</Link>
               </li>
+
               <li className="nav-item">
-                <Link className={`nav-link nav-link-custom ${isActive('/blog')}`} to="/blog">BLOG</Link>
+                <Link onClick={handleNavLinkClick} className={getActiveClass('/contact')} to="/contact">CONTACT</Link>
               </li>
-              <li className="nav-item ms-lg-4">
-                <Link className="btn btn-login-modern px-4 py-2" to="/admin/login">
+
+              <li className="nav-item ms-lg-3 mt-3 mt-lg-0">
+                <Link 
+                  onClick={handleNavLinkClick} 
+                  className="btn btn-warning fw-bold px-4 rounded-pill shadow-sm" 
+                  to="/admin/login"
+                  style={{ fontSize: '0.85rem' }}
+                >
                   ADMIN LOGIN
                 </Link>
               </li>
@@ -103,6 +131,8 @@ function Navbar() {
           </div>
         </div>
       </nav>
+
+      <div className="bg-warning w-100" style={{ height: '3px' }}></div>
     </>
   );
 }

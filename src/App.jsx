@@ -1,5 +1,6 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 // --- AUTH & LAYOUTS ---
 import Login from "./pages/admin/login";
 import AdminLayout from "./layouts/AdminLayout";
@@ -20,58 +21,66 @@ import FarmerHelp from "./pages/services/FarmerHelp";
 
 // --- ADMIN PAGES ---
 import Dashboard from "./pages/admin/dashboard";
+import ContactMessages from "./pages/admin/ContactMessages";
+import ManageSchemes from "./pages/admin/ManageSchemes";
 
-// Electricity
+// Electricity (Admin)
 import ElectricityStatus from "./pages/admin/electricity/UpdateElectricityStatus";
 import ElectricityHistory from "./pages/admin/electricity/ElectricityHistory";
 
-//Blog
+// Blog (Admin)
 import ManageBlogs from "./pages/admin/blog/ManageBlogs";
 import BlogForm from "./pages/admin/blog/BlogForm";
 
-// Master (Fixed Import Paths)
+// Master (Admin)
 import Country from "./pages/admin/master/Country";
 import State from "./pages/admin/master/State";
+import District from "./pages/admin/master/District";
 import SupplyCenter from "./pages/admin/master/SupplyCenter";
 import Village from "./pages/admin/master/Village";
 
-// User Management (Fixed Import Path)
+// User Management (Admin)
 import User from "./pages/admin/user/User";
 
-  
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* =======================
-            PUBLIC / USER ROUTES
-        ======================= */}
-        {/* Base route redirect to home */}
-        <Route path="/" element={<Navigate to="/home" replace />} />
+            USER ROUTES (Public)
+            ======================= 
+            Note: UserLayout ke andar Outlet use karein taaki children render hon
+        */}
+        <Route element={<UserLayout />}>
+          {/* Base route redirect to home */}
+          <Route path="/" element={<Navigate to="/home" replace />} />
 
-        <Route path="/home" element={<UserLayout><Home /></UserLayout>} />
-        <Route path="/about" element={<UserLayout><About /></UserLayout>} />
-        <Route path="/contact" element={<UserLayout><Contact /></UserLayout>} />
-        <Route path="/services" element={<UserLayout><Services /></UserLayout>} />
-        <Route path="/blog" element={<UserLayout><Blog /></UserLayout>} />
-        <Route path="/BlogDetail/:slug" element={<UserLayout><BlogDetail /></UserLayout>} />
-        {/* Services */}
-        <Route path="/services/Electricity" element={<UserLayout><Electricity /></UserLayout>} />
-        <Route path="/services/GovernmentSchemes" element={<UserLayout><GovernmentSchemes /></UserLayout>} />
-        <Route path="/services/Weather" element={<UserLayout><Weather /></UserLayout>} />
-        <Route path="/services/FarmerHelp" element={<UserLayout><FarmerHelp /></UserLayout>} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blogdetail/:slug" element={<BlogDetail />} />
+
+          {/* Services Section */}
+          <Route path="/services/electricity" element={<Electricity />} />
+          <Route path="/services/governmentschemes" element={<GovernmentSchemes />} />
+          <Route path="/services/weather" element={<Weather />} />
+          <Route path="/services/farmerhelp" element={<FarmerHelp />} />
+        </Route>
 
 
         {/* =======================
             ADMIN AUTH
-        ======================= */}
+            ======================= 
+        */}
         <Route path="/admin/login" element={<Login />} />
 
 
         {/* =======================
             PROTECTED ADMIN ROUTES
-        ======================= */}
-        {/* Ye Parent Route automatically AdminLayout aur ProtectedRoute apply karega iske sabhi children par */}
+            ======================= 
+        */}
         <Route
           path="/admin"
           element={
@@ -80,32 +89,47 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* Outlet yahan render hoga */}
+          {/* Index route for admin /admin/dashboard */}
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-
-          {/* Master Routes (Removed duplicate 'admin/' from paths) */}
+          <Route path="contactmessages" element={<ContactMessages />} />
+          <Route path="manageschemes" element={<ManageSchemes />} />
+          {/* Master Management */}
           <Route path="master/country" element={<Country />} />
           <Route path="master/state" element={<State />} />
+          <Route path="master/district" element={<District />} />
           <Route path="master/supplycenter" element={<SupplyCenter />} />
           <Route path="master/village" element={<Village />} />
 
-          {/* Electricity Routes (Lowercased to match Sidebar links) */}
-          <Route path="electricity/UpdateElectricityStatus" element={<ElectricityStatus />} />
-          <Route path="electricity/ElectricityHistory" element={<ElectricityHistory />} />
-          
-          {/* Blog Routes */}
-          <Route path="blog/ManageBlogs" element={<ManageBlogs />} />
-          <Route path="blog/BlogForm" element={<BlogForm />} />
+          {/* Electricity Management */}
+          <Route path="electricity/updateElectricityStatus" element={<ElectricityStatus />} />
+          <Route path="electricity/electricityHistory" element={<ElectricityHistory />} />
 
-          {/* User Routes */}
-          <Route path="user/User" element={<User />} />
+          {/* Blog Management */}
+          <Route path="blog/manageblogs" element={<ManageBlogs />} />
+          <Route path="blog/form" element={<BlogForm />} />
+
+          {/* User Management */}
+          <Route path="user/manage" element={<User />} />
         </Route>
 
 
         {/* =======================
             CATCH ALL (404)
-        ======================= */}
-        <Route path="*" element={<h1 className="text-center mt-5">404 Not Found</h1>} />
+            ======================= 
+        */}
+        <Route path="*" element={
+          <div className="d-flex flex-column align-items-center justify-content-center vh-100 bg-light text-center px-3">
+            <h1 className="display-1 fw-bold text-warning">404</h1>
+            <h2 className="fw-semibold">Page Not Found</h2>
+            <p className="lead text-secondary">
+              Oops! The page you are looking for doesn't exist or has been moved.
+            </p>
+            <Link to="/home" className="btn btn-warning px-4 py-2 mt-3 rounded-pill fw-bold">
+              Back to Home
+            </Link>
+          </div>
+        } />
 
       </Routes>
     </BrowserRouter>

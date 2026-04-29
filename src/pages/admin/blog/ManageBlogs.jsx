@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { blogApi } from "../../../api/blogApi";
 import { 
-  Edit, Trash2, Plus, Calendar, User, Eye, Search, 
+  Edit, Trash2, Plus, Calendar, User, Eye, Search,  
   ChevronLeft, ChevronRight, X, FileText, CheckCircle, Clock 
 } from "lucide-react"; // Added missing icons
 import BlogForm from "./BlogForm";
 
 const ManageBlogs = () => {
-  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_URL;
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_URL; 
 
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);

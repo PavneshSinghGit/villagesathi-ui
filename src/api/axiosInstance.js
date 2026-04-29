@@ -1,13 +1,14 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'https://localhost:7092/api', // Aapka .NET Core backend URL
+    // Hardcoded URL hata kar environment variable use kiya
+    baseURL: import.meta.env.VITE_API_URL, 
     headers: {
         'Content-Type': 'application/json',
     }
 });
 
-// Agar JWT token use kar rahe hain, toh interceptor add kar sakte hain
+// JWT token interceptor (Same rahega)
 axiosInstance.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {

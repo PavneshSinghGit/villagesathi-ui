@@ -1,76 +1,115 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { PhoneCall, Globe, Users } from "lucide-react";
+import { PhoneCall, Globe, Users, Mail, MapPin, ArrowRight } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="footer-gov text-white pt-5 pb-3 bg-dark">
+    <footer className="bg-dark text-white pt-5 pb-4" style={{ borderTop: "4px solid #ffc107" }}>
       <div className="container">
-        {/* text-center (mobile) aur text-md-start (desktop) optimize kiya gaya hai */}
-        <div className="row g-4 text-center text-md-start">
+        <div className="row g-4">
           
-          {/* About Section */}
-          <div className="col-md-4 col-12">
-            <h5 className="fw-bold mb-3 text-warning">VILLAGESATHI 🌾</h5>
-            <p className="small opacity-75">
+          {/* Brand Section */}
+          <div className="col-lg-4 col-md-6">
+            <h4 className="fw-bold text-warning mb-3 d-flex align-items-center">
+              VILLAGESATHI <span className="ms-2">🌾</span>
+            </h4>
+            <p className="text-secondary small lh-lg">
               <img 
                 src="https://flagcdn.com/w20/in.png" 
-                alt="India Flag" 
-                style={{ height: '12px', marginRight: '8px', verticalAlign: 'middle' }} 
+                alt="India" 
+                className="me-2"
+                style={{ width: '18px', borderRadius: '2px' }} 
               />
-              An official effort to empower rural India with digital technology. 
-              We are the bridge between governance and citizens.
+              Empowering rural India through digital innovation. We bridge the gap 
+              between technology and grassroots communities for a sustainable future.
             </p>
-            <p className="small mt-2">
-              <strong>Address:</strong> Main Market, Kakaraha, Mitauli, Kheri (U.P.)
-            </p>
+            <div className="mt-4 d-flex flex-column gap-2 small">
+              <div className="d-flex align-items-center text-secondary">
+                <MapPin size={16} className="me-2 text-warning" />
+                <span>Main Market, Kakaraha, Mitauli, Kheri (U.P.)</span>
+              </div>
+            </div>
           </div>
 
-          {/* Quick Links - Mobile par 2 column mein dikhega (col-6) */}
-          <div className="col-md-2 col-6">
-            <h6 className="fw-bold mb-3">Quick Links</h6>
-            <ul className="list-unstyled footer-links small">
-              <li className="mb-2"><Link to="/" className="text-white text-decoration-none opacity-75">Home</Link></li>
-              <li className="mb-2"><Link to="/about" className="text-white text-decoration-none opacity-75">About Us</Link></li>
-              <li className="mb-2"><Link to="/services" className="text-white text-decoration-none opacity-75">Services</Link></li>
-              <li className="mb-2"><Link to="/blog" className="text-white text-decoration-none opacity-75">Patrika (Blog)</Link></li>
+          {/* Quick Links */}
+          <div className="col-lg-2 col-6 ps-lg-5">
+            <h6 className="fw-bold mb-4 text-uppercase small letter-spacing-1">Company</h6>
+            <ul className="list-unstyled">
+              {["Home", "About", "Services", "Blog"].map((item) => (
+                <li key={item} className="mb-2">
+                  <Link 
+                    to={`/${item.toLowerCase().replace(' ', '')}`} 
+                    className="text-secondary text-decoration-none small d-flex align-items-center link-hover"
+                  >
+                    <ArrowRight size={12} className="me-1 opacity-0 arrow-icon" /> {item}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Help Center - Mobile par 2 column mein dikhega (col-6) */}
-          <div className="col-md-3 col-6">
-            <h6 className="fw-bold mb-3">Help Center</h6>
-            <div className="d-flex align-items-center justify-content-center justify-content-md-start mb-2 small">
-              <PhoneCall size={16} className="me-2 text-warning" /> 
-              <span>+91 9305492516</span>
-            </div>
-            <div className="d-flex align-items-center justify-content-center justify-content-md-start small">
-              <Globe size={16} className="me-2 text-warning" /> 
-              <span className="text-truncate">support@villagesathi.in</span>
+          {/* Support Section */}
+          <div className="col-lg-3 col-6">
+            <h6 className="fw-bold mb-4 text-uppercase small letter-spacing-1">Help Center</h6>
+            <div className="d-flex flex-column gap-3">
+              <a href="tel:+919305492516" className="text-decoration-none text-secondary small d-flex align-items-center">
+                <div className="bg-secondary bg-opacity-25 p-2 rounded-3 me-3">
+                    <PhoneCall size={16} className="text-warning" />
+                </div>
+                +91 9305492516
+              </a>
+              <a href="mailto:support@villagesathi.in" className="text-decoration-none text-secondary small d-flex align-items-center">
+                <div className="bg-secondary bg-opacity-25 p-2 rounded-3 me-3">
+                    <Mail size={16} className="text-warning" />
+                </div>
+                <span className="text-truncate">pavneshsinghlmp@gmail.com</span>
+              </a>
             </div>
           </div>
 
-          {/* Social Icons */}
-          <div className="col-md-3 col-12 text-center">
-            <h6 className="fw-bold mb-3">Follow Us</h6>
-            <div className="d-flex justify-content-center gap-3">
-              <a href="#" className="social-node bg-secondary text-white p-2 rounded-circle d-inline-flex align-items-center justify-content-center">
-                <Globe size={20} />
-              </a>
-              <a href="#" className="social-node bg-secondary text-white p-2 rounded-circle d-inline-flex align-items-center justify-content-center">
-                <Users size={20} />
-              </a>
+          {/* Social & Newsletter */}
+          <div className="col-lg-3 col-md-6 text-md-end text-center">
+            <h6 className="fw-bold mb-4 text-uppercase small letter-spacing-1">Follow Our Journey</h6>
+            <div className="d-flex justify-content-md-end justify-content-center gap-2">
+              {[Globe, Users, Mail].map((Icon, idx) => (
+                <a 
+                  key={idx} 
+                  href="#" 
+                  className="btn btn-outline-warning border-0 bg-secondary bg-opacity-10 rounded-circle p-2"
+                  style={{ transition: '0.3s' }}
+                >
+                  <Icon size={20} />
+                </a>
+              ))}
             </div>
+            <p className="mt-4 small text-secondary">Join 5000+ Villagers</p>
           </div>
 
         </div>
 
-        <hr className="my-4 opacity-25" />
+        <hr className="my-4 border-secondary opacity-25" />
 
-        <div className="text-center small text-white opacity-75">
-          © {new Date().getFullYear()} VillageSathi Platforms Pvt. Ltd. | Designed for Rural Innovation
+        <div className="row align-items-center">
+          <div className="col-md-6 text-center text-md-start">
+            <p className="small text-secondary mb-0">
+              © {new Date().getFullYear()} <strong>VillageSathi Platforms Pvt. Ltd.</strong>
+            </p>
+          </div>
+          <div className="col-md-6 text-center text-md-end">
+            <p className="small text-secondary mb-0" style={{ fontSize: '0.75rem' }}>
+              Designed for Rural Innovation | <span className="text-warning">Digital India</span>
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Extra CSS for hover effects (Aap apni CSS file mein daal sakte hain) */}
+      <style>{`
+        .link-hover { transition: all 0.3s ease; }
+        .link-hover:hover { color: #ffc107 !important; padding-left: 5px; }
+        .link-hover:hover .arrow-icon { opacity: 1 !important; }
+        .letter-spacing-1 { letter-spacing: 1px; }
+      `}</style>
     </footer>
   );
 };

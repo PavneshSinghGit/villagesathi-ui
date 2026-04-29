@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   Zap, BookOpen, Sprout, ShieldCheck, Activity,
   Users, ArrowRight, Smartphone, HeartPulse, PhoneCall, Map,
   GraduationCap
 } from "lucide-react";
-import BlogSkeleton from "../components/BlogSkeleton"; 
+import BlogSkeleton from "../components/BlogSkeleton";
 import "../styles/userStyles.css";
 
 // Accessing environment variables
@@ -39,7 +40,10 @@ function Home() {
 
   return (
     <div className="home-wrapper animate-fade-in">
-      <title>VillageSathi | Digital Empowerment for Rural India</title>
+      <Helmet>
+        <title>VillageSathi | Empowering Rural India with Digital Solutions</title>
+        <meta name="description" content="VillageSathi is an official digital ecosystem facilitating seamless access to Government Schemes, Agricultural Innovation, and Digital Education." />
+      </Helmet>
 
       {/* --- 1. HERO SECTION --- */}
       <header className="hero-section text-center position-relative">
@@ -47,7 +51,7 @@ function Home() {
           <div className="gov-badge mb-4">
             <span className="badge-text text-uppercase tracking-wider">A Digital Initiative for Rural Empowerment</span>
           </div>
-          <h1 className="display-4 fw-bold hero-title">
+          <h1 className="display-6 fw-bold hero-title">
             VillageSathi: Bridging <span className="text-accent">Rural Bharat</span> <br />
             with the Digital Global Era
           </h1>
@@ -74,7 +78,7 @@ function Home() {
           <div className="col-lg-6 order-2 order-lg-1">
             <div className="ps-lg-4">
               <h6 className="text-success fw-bold text-uppercase ls-2 mb-2">Empowering Rural India</h6>
-              <h2 className="display-5 fw-bold mb-4">
+              <h2 className="display-6 fw-bold mb-4">
                 Our Mission: <br />
                 <span className="text-success">Digital Transformation of Villages</span>
               </h2>
@@ -85,12 +89,12 @@ function Home() {
               </p>
 
               <div className="mission-list mt-5">
-                <MissionPoint 
+                <MissionPoint
                   icon={<ShieldCheck size={28} />}
                   title="Verified Government Data"
                   desc="Access real-time updates on Housing, Pension, and Social Welfare schemes."
                 />
-                <MissionPoint 
+                <MissionPoint
                   icon={<Activity size={28} />}
                   title="Last-Mile Connectivity"
                   desc="Delivering accurate weather forecasts and live Mandi rates directly to you."
@@ -143,11 +147,11 @@ function Home() {
               latestBlogs.map(blog => (
                 <div className="col-md-4" key={blog.blogId}>
                   <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden blog-card">
-                    <img 
-                      src={`${IMAGE_BASE_URL}${blog.imageUrl}`} 
-                      className="card-img-top" 
-                      style={{ height: '200px', objectFit: 'fill' }} 
-                      alt={blog.title} 
+                    <img
+                      src={`${IMAGE_BASE_URL}${blog.imageUrl}`}
+                      className="card-img-top"
+                      style={{ height: '200px', objectFit: 'fill' }}
+                      alt={blog.title}
                     />
                     <div className="card-body">
                       <span className="badge bg-success bg-opacity-10 text-success mb-2">{blog.category}</span>
@@ -181,50 +185,50 @@ function Home() {
         </div>
       </section>
 
-     {/* --- 5. STATISTICS (Modernized with Glass Effect) --- */}
-<section className="stats-section py-5 position-relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
-  {/* Decorative background circle */}
-  <div className="position-absolute rounded-circle bg-success opacity-10" style={{ width: '300px', height: '300px', top: '-100px', left: '-100px' }}></div>
-  
-  <div className="container position-relative">
-    <div className="row g-4 text-center">
-      <StatItem icon={<Map size={24} />} num="500+" label="Connected Villages" />
-      <StatItem icon={<Users size={24} />} num="1M+" label="Satisfied Citizens" />
-      <StatItem icon={<Zap size={24} />} num="50+" label="Active Services" />
-      <StatItem icon={<PhoneCall size={24} />} num="24/7" label="Technical Support" />
-    </div>
-  </div>
-</section>
+      {/* --- 5. STATISTICS (Modernized with Glass Effect) --- */}
+      <section className="stats-section py-5 position-relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
+        {/* Decorative background circle */}
+        <div className="position-absolute rounded-circle bg-success opacity-10" style={{ width: '300px', height: '300px', top: '-100px', left: '-100px' }}></div>
 
-{/* --- 6. CALL TO ACTION (Improved Input & Layout) --- */}
-<section className="container my-5 pt-4">
-  <div className="cta-gradient-card p-4 p-md-5 rounded-5 shadow-lg border-0 text-white position-relative overflow-hidden">
-    <div className="row align-items-center position-relative" style={{ zIndex: 2 }}>
-      <div className="col-lg-7 text-center text-lg-start mb-4 mb-lg-0">
-        <h2 className="display-6 fw-bold mb-3">Connect Your Village to the Future</h2>
-        <p className="fs-5 opacity-90 mb-0">Join <span className="text-warning fw-bold">10,000+</span> Sarpanchs and volunteers receiving real-time scheme alerts.</p>
-      </div>
-      <div className="col-lg-5">
-        <div className="bg-white p-2 rounded-pill shadow-sm d-flex align-items-center">
-          <input 
-            type="tel" 
-            className="form-control border-0 bg-transparent px-4 py-2 flex-grow-1" 
-            placeholder="Enter Mobile Number" 
-            style={{ boxShadow: 'none' }}
-          />
-          <button className="btn btn-warning rounded-pill px-4 py-2 fw-bold text-uppercase d-flex align-items-center gap-2 transition-hover">
-            Join <ArrowRight size={18} />
-          </button>
+        <div className="container position-relative">
+          <div className="row g-4 text-center">
+            <StatItem icon={<Map size={24} />} num="500+" label="Connected Villages" />
+            <StatItem icon={<Users size={24} />} num="1M+" label="Satisfied Citizens" />
+            <StatItem icon={<Zap size={24} />} num="50+" label="Active Services" />
+            <StatItem icon={<PhoneCall size={24} />} num="24/7" label="Technical Support" />
+          </div>
         </div>
-        <p className="small mt-3 text-center text-lg-start opacity-75">
-          <ShieldCheck size={14} className="me-1" /> Your data is encrypted and secure.
-        </p>
-      </div>
-    </div>
-    {/* Background Pattern */}
-    <div className="cta-pattern"></div>
-  </div>
-</section>
+      </section>
+
+      {/* --- 6. CALL TO ACTION (Improved Input & Layout) --- */}
+      <section className="container my-5 pt-4">
+        <div className="cta-gradient-card p-4 p-md-5 rounded-5 shadow-lg border-0 text-white position-relative overflow-hidden">
+          <div className="row align-items-center position-relative" style={{ zIndex: 2 }}>
+            <div className="col-lg-7 text-center text-lg-start mb-4 mb-lg-0">
+              <h2 className="display-6 fw-bold mb-3">Connect Your Village to the Future</h2>
+              <p className="fs-5 opacity-90 mb-0">Join <span className="text-warning fw-bold">10,000+</span> Sarpanchs and volunteers receiving real-time scheme alerts.</p>
+            </div>
+            <div className="col-lg-5">
+              <div className="bg-white p-2 rounded-pill shadow-sm d-flex align-items-center">
+                <input
+                  type="tel"
+                  className="form-control border-0 bg-transparent px-4 py-2 flex-grow-1"
+                  placeholder="Enter Mobile Number"
+                  style={{ boxShadow: 'none' }}
+                />
+                <button className="btn btn-warning rounded-pill px-4 py-2 fw-bold text-uppercase d-flex align-items-center gap-2 transition-hover">
+                  Join <ArrowRight size={18} />
+                </button>
+              </div>
+              <p className="small mt-3 text-center text-lg-start opacity-75">
+                <ShieldCheck size={14} className="me-1" /> Your data is encrypted and secure.
+              </p>
+            </div>
+          </div>
+          {/* Background Pattern */}
+          <div className="cta-pattern"></div>
+        </div>
+      </section>
 
     </div>
   );
@@ -260,7 +264,7 @@ const StatItem = ({ icon, num, label }) => (
   <div className="col-md-3 col-6">
     <div className="p-3">
       <div className="text-warning mb-2 d-flex justify-content-center opacity-75">{icon}</div>
-      <h2 className="display-5 fw-bold mb-1 text-white tabular-nums">{num}</h2>
+      <h2 className="display-6 fw-bold mb-1 text-white tabular-nums">{num}</h2>
       <p className="text-uppercase small fw-semibold text-white" style={{ color: '#ffff !important' }}>{label}</p>
     </div>
   </div>

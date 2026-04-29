@@ -74,8 +74,8 @@ function BlogDetail() {
   return (
     <article className="blog-detail-page pb-5 bg-white">
       <Helmet>
-        <title>{post.title} | VillageSathi</title>
-        <meta name="description" content={post.shortDescription} />
+        <title>{post.title} | VillageSathi Journal</title>
+        <meta name="description" content={post.shortDescription} />        
       </Helmet>
 
       {/* --- IMAGE SECTION (FIXED) --- */}
@@ -84,7 +84,7 @@ function BlogDetail() {
           src={getImageUrl(post.imageUrl)}
           alt={post.title}
           className="w-100 h-100"
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          style={{ objectFit: 'fill', objectPosition: 'center' }}
         />
         <div
           className="position-absolute bottom-0 start-0 w-100 p-4 text-white"
@@ -136,19 +136,33 @@ function BlogDetail() {
               style={{
                 textAlign: 'justify',
                 color: '#2c3e50',
-                whiteSpace: 'pre-wrap', 
+                whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
-                overflowWrap: 'anywhere' 
+                overflowWrap: 'anywhere'
               }}
               dangerouslySetInnerHTML={{ __html: sanitizedContent }}
             />
 
-            {/* Footer */}
-            <footer className="mt-5 p-4 bg-light rounded-4 border-start border-success border-4 shadow-sm">
-              <h5 className="fw-bold text-dark">Aapke kya vichaar hain?</h5>
-              <p className="text-muted mb-0">Hame feedback dein ya WhatsApp group join karein.</p>
-              <div className="d-flex gap-2 mt-3">
-                <Link to="/contact" className="btn btn-success rounded-pill px-4">Contact Us</Link>
+            {/* Article Footer / Call to Action */}
+            <footer className="mt-5 p-4 bg-success bg-opacity-10 rounded-4 border-start border-success border-5 shadow-sm">
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                  <h5 className="fw-bold text-success mb-1">Share your thoughts</h5>
+                  <p className="text-muted mb-0">Help us improve by sharing your feedback or joining our local digital network.</p>
+                </div>
+                <div className="d-flex gap-2">
+                  <Link to="/contact" className="btn btn-white bg-white border rounded-pill px-4 fw-bold shadow-sm">
+                    Contact Us
+                  </Link>
+                  <a
+                    href="https://wa.me/+919305492516"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-success rounded-pill px-4 fw-bold shadow-sm"
+                  >
+                    Join Group
+                  </a>
+                </div>
               </div>
             </footer>
 

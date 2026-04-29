@@ -18,7 +18,7 @@ function FarmerHelp() {
     {
       id: 2,
       title: "WhatsApp Advisory",
-      detail: "+91 99XXXXXX00",
+      detail: "+91 9305492516",
       icon: <MessageSquare size={28} className="text-success" />,
       desc: "Send crop photos for instant disease diagnosis and treatment plans."
     },
@@ -41,7 +41,8 @@ function FarmerHelp() {
   return (
     <div className="farmer-help-page pb-5 bg-light">
       <Helmet>
-        <title>Farmer Support Center | Agricultural Advisory | VillageSathi</title>
+        <title>Farmer Support | VillageSathi</title>
+        <meta name="description" content="Get agricultural advisory and farmer support at VillageSathi." />
       </Helmet>
 
       {/* --- HERO SECTION --- */}
@@ -49,10 +50,10 @@ function FarmerHelp() {
         <div className="container text-center py-4">
           <div className="d-flex align-items-center justify-content-center gap-3 mb-3">
             <HelpingHand size={45} className="text-warning" />
-            <h1 className="display-4 fw-bold m-0">Kisan Sahayata Kendra</h1>
+            <h1 className="display-4 fw-bold m-0 text-white">Kisan Sahayata Kendra</h1>
           </div>
           <p className="lead mx-auto opacity-90" style={{ maxWidth: '750px' }}>
-            From seed selection to market access, we empower your journey. 
+            From seed selection to market access, we empower your journey.
             Get expert guidance on crop diseases, fertilizers, and modern farming techniques instantly.
           </p>
         </div>
@@ -107,15 +108,15 @@ function FarmerHelp() {
         {/* --- KNOWLEDGE BASE --- */}
         <div className="mt-5">
           <div className="d-flex align-items-center gap-2 mb-4">
-             <div className="bg-success rounded-pill" style={{ width: '8px', height: '30px' }}></div>
-             <h3 className="fw-bold m-0">Verified Agricultural Insights</h3>
+            <div className="bg-success rounded-pill" style={{ width: '8px', height: '30px' }}></div>
+            <h3 className="fw-bold m-0">Verified Agricultural Insights</h3>
           </div>
           <div className="row g-4">
             <div className="col-md-6">
               <div className="p-4 bg-white rounded-4 h-100 border-start border-4 border-success shadow-sm">
                 <h5 className="fw-bold text-success">Optimizing Fertilizer Usage</h5>
                 <p className="text-muted mb-0">
-                  Excessive Urea usage can lead to soil degradation. Always maintain an 
+                  Excessive Urea usage can lead to soil degradation. Always maintain an
                   <strong> N-P-K ratio of 4:2:1</strong> for sustainable soil health and better yields.
                 </p>
               </div>
@@ -124,7 +125,7 @@ function FarmerHelp() {
               <div className="p-4 bg-white rounded-4 h-100 border-start border-4 border-primary shadow-sm">
                 <h5 className="fw-bold text-primary">Crop Insurance (PMFBY) Claims</h5>
                 <p className="text-muted mb-0">
-                  In case of damage due to weather, ensure you notify your bank or agricultural officer within 
+                  In case of damage due to weather, ensure you notify your bank or agricultural officer within
                   <strong> 72 hours</strong> to process your claim successfully.
                 </p>
               </div>

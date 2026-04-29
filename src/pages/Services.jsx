@@ -1,10 +1,10 @@
 import React from "react";
-import { 
-  Zap, Landmark, Sprout, HeartPulse, GraduationCap, Truck, ArrowRight 
+import {
+  Zap, Landmark, Sprout, HeartPulse, GraduationCap, Truck, ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import "../styles/userStyles.css";
-
+import { Helmet } from "react-helmet-async";
 function Services() {
   const allServices = [
     {
@@ -59,7 +59,10 @@ function Services() {
 
   return (
     <div className="services-page py-5 bg-light">
-      <title>Services | VillageSathi</title>
+      <Helmet>
+        <title>Our Services | VillageSathi - Digital Solutions for Rural India</title>
+        <meta name="description" content="Explore the range of digital services offered by VillageSathi to empower rural communities." />
+      </Helmet>
       {/* --- HEADER SECTION --- */}
       <div className="container text-center mb-5">
         <h6 className="text-success fw-bold text-uppercase tracking-widest mb-2" style={{ letterSpacing: '2px' }}>
@@ -68,7 +71,7 @@ function Services() {
         <h2 className="display-5 fw-bold text-dark mb-3">Unified Digital Solutions</h2>
         <div className="underline mx-auto mb-4" style={{ width: '60px', height: '4px', backgroundColor: '#198754', borderRadius: '2px' }}></div>
         <p className="text-muted fs-5 mx-auto" style={{ maxWidth: '800px' }}>
-          VillageSathi bridges the digital divide by providing essential services tailored for the 
+          VillageSathi bridges the digital divide by providing essential services tailored for the
           unique needs of rural India. Experience governance and growth in your pocket.
         </p>
       </div>
@@ -84,7 +87,7 @@ function Services() {
                 </div>
                 <h4 className="fw-bold mb-3 text-dark">{service.title}</h4>
                 <p className="text-muted mb-4 leading-relaxed" style={{ fontSize: '0.95rem' }}>{service.desc}</p>
-                
+
                 <Link to={service.path} className="btn btn-link p-0 fw-bold text-decoration-none text-success d-flex align-items-center gap-2 group">
                   <span>Explore Service</span>
                   <ArrowRight className="transition-transform group-hover-translate-x-1" size={18} />
@@ -100,7 +103,7 @@ function Services() {
         <div className="cta-banner p-5 rounded-5 text-center text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #1a5d1a 0%, #2c7a2c 100%)' }}>
           <h3 className="fw-bold mb-3 h2">Need a Specific Service?</h3>
           <p className="mb-4 opacity-75 fs-5">
-            We are constantly expanding our ecosystem. Suggest a new digital service 
+            We are constantly expanding our ecosystem. Suggest a new digital service
             to help your village grow faster!
           </p>
           <div className="d-flex justify-content-center gap-3">

@@ -1,88 +1,166 @@
-/* Official Styling */
+/* Official Styling - Top Bar */
 .gov-top-bar {
-  background-color: #f8fafc;
+  background-color: #f1f5f9;
   border-bottom: 1px solid #e2e8f0;
-  color: #64748b;
+  color: #475569;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
 }
 
+/* Saffron Border - Indian Govt Look */
 .border-bottom-orange {
-  border-bottom: 4px solid #ff9933 !important;
+  border-bottom: 3px solid #ff9933 !important;
+  /* Proper Saffron color */
 }
 
+/* Logo & Brand */
 .brand-main {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #003366;
+  /* Navy Blue */
+  line-height: 1;
 }
 
 .brand-sub {
-  font-size: 10px;
-  color: #198754;
+  font-size: 11px;
+  color: #166534;
+  /* Darker Green for better readability */
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Nav Links Styling */
+.nav-link {
+  color: #334155 !important;
+  /* Slate color for soft look */
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 16px !important;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Active Link & Hover Effect */
+.nav-link:hover,
+.nav-link.active {
+  color: #003366 !important;
+}
+
+/* Link underline effect on desktop */
+@media (min-width: 992px) {
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 5px;
+    left: 50%;
+    background-color: #ff9933;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 70%;
+  }
+}
+
+/* Mega Menu / Dropdown Fix */
+.dropdown-menu {
+  border: none !important;
+  border-top: 4px solid #003366 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 1rem !important;
+  min-width: 250px;
+}
+
+/* Service Box (Inside Dropdown) */
+.dropdown-item {
+  display: flex !important;
+  align-items: center;
+  padding: 12px 15px !important;
+  border-radius: 6px !important;
+  color: #475569 !important;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f8fafc !important;
+  color: #003366 !important;
+  transform: translateX(5px);
+}
+
+.dropdown-item strong {
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
-/* Nav Links */
-.nav-link-custom {
-  color: #003366 !important;
-  font-weight: 700;
-  font-size: 14px;
-  padding: 25px 15px !important;
-}
-
-/* Mega Menu Fix */
-.mega-menu-custom {
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  border-top: 4px solid #003366 !important;
-  display: none; /* Bootstrap handles visibility via .show class */
-}
-
-/* Desktop pe click par card dikhane ke liye dropdown-menu ki standard class */
-.dropdown-menu.show {
-  display: block !important;
-}
-
-/* Service Item Styling */
-.service-box {
-  display: flex !important;
-  align-items: center;
-  padding: 10px !important;
-  white-space: normal !important;
-  border-radius: 5px;
-  transition: background 0.2s;
-}
-
-.service-box:hover {
-  background-color: #f1f5f9 !important;
-}
-
-.service-box strong {
-  display: block;
-  font-size: 14px;
-  color: #003366;
-}
-
-/* Button */
+/* Primary CTA Button (Admin Login) */
 .btn-gov-navy {
-  background-color: #003366;
-  color: white;
-  border-radius: 0;
+  background: #003366;
+  color: #ffffff !important;
+  border-radius: 50px !important;
+  /* Rounded pill style */
   font-weight: 700;
+  padding: 8px 24px !important;
+  font-size: 13px;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 51, 102, 0.2);
+  transition: all 0.3s ease;
 }
 
 .btn-gov-navy:hover {
-  background-color: #002244;
-  color: white;
+  background: #002244;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 51, 102, 0.3);
 }
 
-/* Mobile View Handling */
+/* Mobile View Adjustments */
 @media (max-width: 991px) {
-  .mega-menu-custom {
-    min-width: 100% !important;
-    position: static !important;
-    transform: none !important;
-    box-shadow: none !important;
-    border: none !important;
+  .navbar-collapse {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
-  .nav-link-custom { padding: 10px 0 !important; }
+
+  .nav-link {
+    padding: 12px 0 !important;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .dropdown-menu {
+    border: none !important;
+    box-shadow: none !important;
+    padding-left: 15px !important;
+    background-color: #f8fafc !important;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-toggle::after {
+  vertical-align: .255em;
+  content: "";
+  border: 0.5em solid #0000;
+  border-top-color: currentColor;
+  border-bottom: 0;
+  margin-left: .255em;
+  display: inline-block;
 }

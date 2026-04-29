@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { 
+  LayoutDashboard, Mail, Globe, Map, Pin, Home, 
+  Warehouse, Zap, History, FileText, PlusCircle, 
+  Users, Briefcase, ChevronRight 
+} from "lucide-react";
 
 function Sidebar() {
   const location = useLocation();
   const [hoveredItem, setHoveredItem] = useState(null);
 
-  // Styles
   const styles = {
     container: {
       width: "260px",
@@ -16,6 +20,8 @@ function Sidebar() {
       display: "flex",
       flexDirection: "column",
       borderRight: "1px solid #1f2937",
+      position: "sticky",
+      top: 0
     },
     brand: {
       padding: "0 12px 24px",
@@ -57,11 +63,10 @@ function Sidebar() {
       background: isActive ? "#2563eb" : isHovered ? "#1f2937" : "transparent",
       fontWeight: isActive ? "600" : "400",
       position: "relative",
-      overflow: "hidden",
     };
   };
 
-  const NavItem = ({ to, icon, label }) => (
+  const NavItem = ({ to, icon: Icon, label }) => (
     <li>
       <Link
         to={to}
@@ -69,11 +74,9 @@ function Sidebar() {
         onMouseEnter={() => setHoveredItem(to)}
         onMouseLeave={() => setHoveredItem(null)}
       >
-        {location.pathname === to && (
-          <div style={{ position: 'absolute', left: 0, width: '4px', height: '60%', background: '#fff', borderRadius: '0 4px 4px 0' }} />
-        )}
-        <span style={{ marginRight: "12px", fontSize: "1.1rem" }}>{icon}</span>
-        {label}
+        <Icon size={18} style={{ marginRight: "12px" }} />
+        <span style={{ flexGrow: 1 }}>{label}</span>
+        {location.pathname === to && <ChevronRight size={14} />}
       </Link>
     </li>
   );
@@ -91,28 +94,33 @@ function Sidebar() {
       {/* Navigation */}
       <nav style={styles.navArea}>
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-          <NavItem to="/admin/dashboard" icon="📊" label="Dashboard" />
+          <NavItem to="/admin/dashboard" icon={LayoutDashboard} label="Dashboard" />
+          <NavItem to="/admin/ContactMessages" icon={Mail} label="Contact Messages" />
+          
+          {/* --- NEW SERVICES SECTION --- */}
+          <li style={styles.sectionTitle}>Government Schemes</li>
+          <NavItem to="/admin/ManageSchemes" icon={Briefcase} label="Manage Schemes" />
 
           <li style={styles.sectionTitle}>Geography</li>
-          <NavItem to="/admin/master/Country" icon="🌍" label="Country" />
-          <NavItem to="/admin/master/State" icon="🏙️" label="State" />
-          <NavItem to="/admin/master/Village" icon="🏡" label="Village" />
-          <NavItem to="/admin/master/SupplyCenter" icon="🏢" label="Supply Center" />
+          <NavItem to="/admin/master/Country" icon={Globe} label="Country" />
+          <NavItem to="/admin/master/State" icon={Map} label="State" />
+          <NavItem to="/admin/master/District" icon={Pin} label="District" />
+          <NavItem to="/admin/master/Village" icon={Home} label="Village" />
+          <NavItem to="/admin/master/SupplyCenter" icon={Warehouse} label="Supply Center" />
 
           <li style={styles.sectionTitle}>Electricity</li>
-          <NavItem to="/admin/electricity/UpdateElectricityStatus" icon="⚡" label="Live Status" />
-          <NavItem to="/admin/electricity/ElectricityHistory" icon="📜" label="History Logs" />
+          <NavItem to="/admin/electricity/UpdateElectricityStatus" icon={Zap} label="Live Status" />
+          <NavItem to="/admin/electricity/ElectricityHistory" icon={History} label="History Logs" />
           
           <li style={styles.sectionTitle}>Content</li>
-          <NavItem to="/admin/blog/ManageBlogs" icon="📝" label="Manage Blogs" />
-          <NavItem to="/admin/blog/BlogForm" icon="➕" label="Create New" />
+          <NavItem to="/admin/blog/ManageBlogs" icon={FileText} label="Manage Blogs" />
+          <NavItem to="/admin/blog/BlogForm" icon={PlusCircle} label="Create New Post" />
 
           <li style={styles.sectionTitle}>Access</li>
-          <NavItem to="/admin/user/User" icon="👥" label="User Directory" />
+          <NavItem to="/admin/user/User" icon={Users} label="User Directory" />
         </ul>
       </nav>
       
-      {/* Footer Branding (Optional) */}
       <div style={{ marginTop: "auto", padding: "10px", textAlign: "center" }}>
           <p style={{ fontSize: "0.6rem", color: "#374151" }}>v1.0.4 Premium</p>
       </div>
