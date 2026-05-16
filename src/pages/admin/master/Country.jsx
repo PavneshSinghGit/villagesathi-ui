@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { Globe, PlusCircle, Edit, X, Search, Loader2, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Country = () => {
+  const navigate = useNavigate();
   const [countries, setCountries] = useState([]);
   const [formData, setFormData] = useState({ id: 0, name: '' });
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // .env se API URL uthana
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-  // 1. Data Fetch Function
   const fetchCountries = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/Master/GetAll/Country`);
       setCountries(Array.isArray(response.data) ? response.data : (response.data.data || []));
     } catch (error) {
       console.error("Error fetching countries:", error);
-      // Agar API down ho ya URL galat ho
     }
   };
 
@@ -25,45 +26,44 @@ const Country = () => {
     fetchCountries();
   }, []);
 
-  // 2. Form Input Handling
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. Save or Update (POST)
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      return Swal.fire('Wait!', 'Please enter a country name.', 'warning');
+      return Swal.fire({
+        title: 'Wait!',
+        text: 'Please enter a country name.',
+        icon: 'warning',
+        confirmButtonColor: '#0f172a'
+      });
     }
 
     setLoading(true);
     try {
-      // Dono Add aur Update isi ek POST endpoint se handle honge (Backend logic ke hisaab se)
       const response = await axios.post(`${API_BASE_URL}/Master/SaveCountry`, formData);
-
       if (response.data) {
         Swal.fire({
           icon: 'success',
-          title: formData.id > 0 ? 'Updated!' : 'Saved!',
-          text: `Country has been ${formData.id > 0 ? 'updated' : 'added'} successfully.`,
+          title: formData.id > 0 ? 'Record Synchronized!' : 'Record Saved!',
+          text: `Country data has been updated successfully.`,
           timer: 2000,
           showConfirmButton: false
         });
 
-        setFormData({ id: 0, name: '' }); // Reset Form
-        fetchCountries(); // Refresh List
+        setFormData({ id: 0, name: '' });
+        fetchCountries();
       }
     } catch (error) {
-      Swal.fire('Error', 'Failed to save data. Please try again.', 'error');
+      Swal.fire('Error', 'System synchronization failed.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // 4. Edit Function
   const handleEdit = (item) => {
-    // Dapper normally returns PascalCase fields
     setFormData({
       id: item.Id || item.id,
       name: item.Name || item.name
@@ -71,71 +71,183 @@ const Country = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const filteredCountries = countries.filter(c => 
+    (c.Name || c.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-5xl mx-auto">
+    <div className="container-fluid py-4 px-md-5" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+      <style>{`
+        .country-hero {
+          background: #0f172a;
+          border-radius: 20px;
+          padding: 25px 30px;
+          border-bottom: 4px solid #ea580c;
+          margin-bottom: 30px;
+        }
+        .form-card-premium {
+          background: white;
+          border-radius: 18px;
+          border: 1px solid #e2e8f0;
+          padding: 20px;
+          margin-top: -20px;
+          position: relative;
+          z-index: 10;
+        }
+        .input-premium-master {
+          border-radius: 10px;
+          border: 1px solid #e2e8f0;
+          padding: 10px 15px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          background: #f8fafc;
+          transition: 0.2s;
+        }
+        .input-premium-master:focus {
+          border-color: #ea580c;
+          background: white;
+          box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.05);
+          outline: none;
+        }
+        .btn-master-save {
+          background: #0f172a;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-weight: 700;
+          padding: 10px 25px;
+          transition: 0.3s;
+        }
+        .btn-master-save:hover { background: #ea580c; transform: translateY(-1px); }
+        .table-premium thead th {
+          background: #f8fafc;
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: #64748b;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          padding: 15px;
+          border: none;
+        }
+        .search-box-master {
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          padding: 0 15px;
+          width: 100%;
+          max-width: 300px;
+        }
+        .search-box-master input { border: none; padding: 10px; outline: none; width: 100%; font-size: 0.85rem; }
+      `}</style>
 
-        {/* Page Header */}
-        <div className="mb-6">
-          <h2 className="text-3xl font-extrabold text-gray-800">Country Master</h2>
-          <p className="text-gray-600">Setup and manage countries for Village Sathi platform.</p>
-        </div>
-
-        {/* Input Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-          <form onSubmit={handleSubmit} className="form-section">
-            <div className="row">
-              <div className="col-md-6 mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country Name</label>
-                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="e.g. India" className="form-control"/>
+      {/* Header Area */}
+      <div className="country-hero shadow-lg">
+        <div className="row align-items-center">
+          <div className="col-md-8">
+            <button className="btn btn-link text-white-50 p-0 mb-2 text-decoration-none d-flex align-items-center small fw-bold" onClick={() => navigate('/admin/dashboard')}>
+              <ArrowLeft size={14} className="me-1" /> DASHBOARD
+            </button>
+            <div className="d-flex align-items-center gap-3">
+              <div className="p-3 rounded-4" style={{ background: 'rgba(234, 88, 12, 0.1)' }}>
+                <Globe size={28} style={{ color: '#ea580c' }} />
               </div>
-              <div className="col-md-6 mb-4 flex items-end gap-2">
-                <button type="submit" disabled={loading} className="btn btn-primary">
-                  {loading ? 'Processing...' : formData.id > 0 ? 'Update Country' : 'Save Country'} </button>
-
-                {formData.id > 0 && (
-                  <button type="button" onClick={() => setFormData({ id: 0, name: '' })} className="btn btn-secondary">Cancel</button>
-                )}
+              <div>
+                <h3 className="text-white fw-bold mb-0">Country Master</h3>
+                <p className="text-white-50 small mb-0 fw-bold uppercase">Global Location Configuration</p>
               </div>
             </div>
-          </form>
+          </div>
         </div>
+      </div>
 
-        {/* List Table */}
-        <div className="table-responsive border rounded-lg">
-          <table className="table table-hover w-full">
-            <thead className="table-dark">
-              <tr>
-                <th className="text-xs font-bold text-gray-500 uppercase tracking-wider">Sr. No.</th>
-                <th className="text-xs font-bold text-gray-500 uppercase tracking-wider">Country Name</th>
-                <th className="text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {countries.length > 0 ? (
-                countries.map((item, index) => (
-                  <tr key={item.Id || item.id} className="hover:bg-blue-50/30 transition">
-                    <td className="text-sm text-gray-600">{index + 1}</td>
-                    <td className="text-sm font-semibold text-gray-800">{item.Name || item.name}</td>
-                    <td className="text-right">
-                      <button onClick={() => handleEdit(item)} className="btn btn-warning btn-sm">Edit</button>
-                    </td>
+      <div className="row justify-content-center">
+        <div className="col-lg-11">
+          {/* Input Panel */}
+          <div className="form-card-premium shadow-sm mb-4">
+            <form onSubmit={handleSubmit}>
+              <div className="row g-3 align-items-end">
+                <div className="col-md-6">
+                  <label className="small fw-bold text-muted mb-2 uppercase tracking-widest">Entry Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    className="input-premium-master w-100"
+                    placeholder="e.g. India"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="col-md-6 d-flex gap-2">
+                  <button type="submit" disabled={loading} className="btn-master-save shadow-sm d-flex align-items-center gap-2 flex-grow-1 justify-content-center">
+                    {loading ? <Loader2 size={18} className="animate-spin" /> : formData.id > 0 ? <Edit size={18} /> : <PlusCircle size={18} />}
+                    {formData.id > 0 ? 'UPDATE COUNTRY' : 'SAVE COUNTRY'}
+                  </button>
+                  {formData.id > 0 && (
+                    <button type="button" onClick={() => setFormData({ id: 0, name: '' })} className="btn btn-light border px-4 rounded-3 fw-bold text-muted d-flex align-items-center gap-2">
+                      <X size={18} /> CANCEL
+                    </button>
+                  )}
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* List Section */}
+          <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div className="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <h5 className="fw-bold m-0 text-dark">Geographic Registry</h5>
+              <div className="search-box-master shadow-sm">
+                <Search size={16} className="text-muted" />
+                <input 
+                  type="text" 
+                  placeholder="Find country..." 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)} 
+                />
+              </div>
+            </div>
+
+            <div className="table-responsive">
+              <table className="table table-premium align-middle m-0">
+                <thead>
+                  <tr>
+                    <th className="ps-4">SERIAL NO.</th>
+                    <th>COUNTRY NAME</th>
+                    <th>ENTITY ID</th>
+                    <th className="text-end pe-4">MANAGEMENT</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="3" className="px-6 py-10 text-center text-gray-400 italic">
-                    No countries found in the database.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {filteredCountries.length > 0 ? filteredCountries.map((item, index) => (
+                    <tr key={item.Id || item.id} className="border-bottom">
+                      <td className="ps-4 text-muted small fw-bold">{index + 1}</td>
+                      <td><div className="fw-bold text-dark">{item.Name || item.name}</div></td>
+                      <td><span className="badge bg-slate-100 text-dark border p-2" style={{ fontSize: '0.65rem', background: '#f1f5f9' }}>#ID-{item.Id || item.id}</span></td>
+                      <td className="text-end pe-4">
+                        <button onClick={() => handleEdit(item)} className="btn btn-sm btn-light border text-primary fw-bold rounded-pill px-3 transition-all hover:bg-primary hover:text-white">
+                          <Edit size={14} className="me-1" /> MODIFY
+                        </button>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="4" className="text-center py-5">
+                        <Globe size={48} className="text-muted opacity-25 mb-2 mx-auto d-block" />
+                        <p className="text-muted small fw-bold uppercase">No records found in geographic registry</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-// YEH LINE SABSE ZARURI HAI
 export default Country;

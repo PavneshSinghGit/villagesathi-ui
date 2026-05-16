@@ -1,348 +1,546 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useReducer } from "react";
 import axios from "axios";
 import { Helmet } from "react-helmet-async";
 import {
   Zap, MapPin, RefreshCw, AlertTriangle, ShieldCheck,
-  Phone, Lightbulb, Receipt, BarChart3
+  Phone, BarChart3, CheckCircle2, Info, Clock, Scale,
+  Wifi, WifiOff, Wrench
 } from "lucide-react";
-import "../../styles/servicesStyles.css";
 
-const apiClient = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+// ─── API ─────────────────────────────────────────────────────────────────────
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+const get = (url, params) => api.get(url, { params }).then((r) => r.data);
 
-const formatKey = (key) => {
-  const result = key.replace(/([A-Z])/g, ' $1');
-  return result.charAt(0).toUpperCase() + result.slice(1);
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const toLabel = (key) =>
+  key.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase());
+
+const STATUS_MAP = {
+  1: {
+    bg: "var(--success-bg)",
+    border: "var(--success)",
+    text: "Active — Supply On",
+    label: "ACTIVE / चालू",
+    Icon: CheckCircle2,
+    color: "var(--success)",
+  },
+  2: {
+    bg: "var(--warn-bg)",
+    border: "var(--warn)",
+    text: "Maintenance in Progress",
+    label: "MAINTENANCE / सुधार जारी",
+    Icon: Wrench,
+    color: "var(--warn)",
+  },
+  3: {
+    bg: "var(--danger-bg)",
+    border: "var(--danger)",
+    text: "Offline — Supply Cut",
+    label: "OFFLINE / बिजली बंद",
+    Icon: WifiOff,
+    color: "var(--danger)",
+  },
+};
+const DEFAULT_STATUS = {
+  bg: "#f1f5f9",
+  border: "var(--navy)",
+  text: "Unknown Status",
+  label: "UNKNOWN",
+  Icon: Info,
+  color: "var(--navy)",
 };
 
-const Electricity = () => {
-  const [activeTab, setActiveTab] = useState("status");
-  const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [centers, setCenters] = useState([]);
-  const [villages, setVillages] = useState([]);
+// ─── State Management ─────────────────────────────────────────────────────────
+const INIT = {
+  states: [], districts: [], centers: [], villages: [],
+  stateId: "", districtId: "", centerId: "", villageId: "",
+  result: null, loading: false, error: "",
+};
 
-  const [countryId, setCountryId] = useState("");
-  const [stateId, setStateId] = useState("");
-  const [districtId, setDistrictId] = useState("");
-  const [centerId, setCenterId] = useState("");
-  const [villageId, setVillageId] = useState("");
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET":       return { ...state, ...action.payload };
+    case "LOADING":   return { ...state, loading: true, error: "", result: null };
+    case "SUCCESS":   return { ...state, loading: false, result: action.payload };
+    case "ERROR":     return { ...state, loading: false, error: action.payload };
+    case "PICK_STATE":
+      return { ...state, stateId: action.id, districtId: "", centerId: "", villageId: "", districts: [], centers: [], villages: [] };
+    case "PICK_DISTRICT":
+      return { ...state, districtId: action.id, centerId: "", villageId: "", centers: [], villages: [] };
+    case "PICK_CENTER":
+      return { ...state, centerId: action.id, villageId: "", villages: [] };
+    default: return state;
+  }
+}
 
-  const [statusData, setStatusData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+// ─── Main Component ───────────────────────────────────────────────────────────
+export default function Electricity() {
+  const [s, dispatch] = useReducer(reducer, INIT);
 
-  // Location Fetching Logic
+  // Bootstrap
   useEffect(() => {
-    apiClient.get("/Electricity/location/countries")
-      .then(res => setCountries(res.data))
-      .catch(err => console.error("Error fetching countries:", err));
+    get("/Electricity/location/states/1").then((states) =>
+      dispatch({ type: "SET", payload: { states } })
+    ).catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (countryId) {
-      apiClient.get(`/Electricity/location/states/${countryId}`).then(res => setStates(res.data)).catch(console.error);
-    }
-  }, [countryId]);
+    if (!s.stateId) return;
+    dispatch({ type: "PICK_STATE", id: s.stateId });
+    get(`/Electricity/location/districts/${s.stateId}`).then((districts) =>
+      dispatch({ type: "SET", payload: { districts } })
+    );
+  }, [s.stateId]);
 
   useEffect(() => {
-    if (stateId) {
-      apiClient.get(`/Electricity/location/districts/${stateId}`).then(res => setDistricts(res.data)).catch(console.error);
-    }
-  }, [stateId]);
+    if (!s.districtId) return;
+    get(`/Electricity/supply-centers/${s.districtId}`).then((centers) =>
+      dispatch({ type: "SET", payload: { centers } })
+    );
+  }, [s.districtId]);
 
   useEffect(() => {
-    if (districtId) {
-      apiClient.get(`/Electricity/supply-centers/${districtId}`).then(res => setCenters(res.data)).catch(console.error);
-    }
-  }, [districtId]);
+    if (!s.centerId) return;
+    get(`/Electricity/villages/${s.centerId}`).then((villages) =>
+      dispatch({ type: "SET", payload: { villages } })
+    );
+  }, [s.centerId]);
 
-  useEffect(() => {
-    if (centerId) {
-      apiClient.get(`/Electricity/villages/${centerId}`).then(res => setVillages(res.data)).catch(console.error);
-    }
-  }, [centerId]);
-
-  const handleCheck = async () => {
-    if (!centerId || !villageId) {
-      setError("Please select both Supply Center and Village.");
+  const handleCheck = useCallback(async () => {
+    if (!s.centerId || !s.villageId) {
+      dispatch({ type: "ERROR", payload: "Please select a Supply Center and Village." });
       return;
     }
-    setIsLoading(true);
-    setError("");
-    setStatusData(null);
+    dispatch({ type: "LOADING" });
     try {
-      const res = await apiClient.get('/Electricity/status', {
-        params: { centerId, villageId }
-      });
-      if (res.data.success) {
-        setStatusData(res.data.data);
-      } else {
-        setError(res.data.message || "No records found for this village.");
-      }
-    } catch (err) {
-      setError(`Error: ${err.response?.data?.message || "Server connection failed."}`);
-    } finally {
-      setIsLoading(false);
+      const res = await get("/Electricity/status", { centerId: s.centerId, villageId: s.villageId });
+      if (res.success) dispatch({ type: "SUCCESS", payload: res.data });
+      else dispatch({ type: "ERROR", payload: res.message || "No records found for this location." });
+    } catch {
+      dispatch({ type: "ERROR", payload: "Could not reach the server. Please try again." });
     }
-  };
+  }, [s.centerId, s.villageId]);
 
   return (
-    <div className="electricity-page container-fluid container-md py-4 py-md-5">
+    <main className="e-root">
       <Helmet>
-        <title>Electricity Monitor | VillageSathi</title>
-        <meta name="description" content="Check real-time power status and billing for your village." />
+        <title>Smart Power Tracker — Village Electricity Status | VillageSathi</title>
+        <meta name="description" content="Check real-time electricity supply status for your village. IoT-enabled grid monitoring for Gram Panchayats across Uttar Pradesh." />
+        <meta name="keywords" content="village electricity status, bijli status, power supply UP, gram panchayat electricity, rural electricity tracker" />
+        <meta property="og:title" content="Smart Power Tracker | VillageSathi" />
+        <meta property="og:description" content="Track real-time electricity supply status for your village via official grid monitoring." />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://villagesathi.in/electricity" />
       </Helmet>
 
-      {/* HEADER */}
-      <div className="text-center mb-4 mb-md-5 px-2">
-        <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row gap-2 gap-md-3 mb-3">
-          <div className="icon-badge bg-success-light text-success m-0 shadow-sm">
-            <Zap size={32} className="pulse-animation" />
+      {/* Hero */}
+      <header className="e-hero" role="banner">
+        <div className="e-container e-hero-inner">
+          <div className="e-hero-text">
+            <span className="e-badge" aria-label="Official portal">
+              <Scale size={13} aria-hidden="true" />
+              विद्युत आपूर्ति पोर्टल&nbsp;·&nbsp;Power Supply Monitor
+            </span>
+            <h1 className="e-hero-title">
+              Smart <span className="e-saffron">Power</span> Tracker
+            </h1>
+            <p className="e-hero-sub">
+              IoT-enabled grid monitoring for real-time village electricity status.
+            </p>
           </div>
-          <h1 className="fw-bold fs-2 fs-md-1 m-0 text-dark tracking-tight">Village Power Monitor</h1>
+          <div className="e-hero-status" aria-live="polite">
+            <Clock size={15} aria-hidden="true" />
+            <span>Grid Sync: Live</span>
+          </div>
         </div>
-        <p className="text-muted fs-6 fs-md-5 mx-auto" style={{ maxWidth: '800px' }}>
-          Real-time Power Status, Billing, and Usage history.
-        </p>
+      </header>
+
+      {/* Ticker */}
+      <div className="e-ticker" role="marquee" aria-label="Grid alerts">
+        <Zap size={13} className="e-saffron-icon" aria-hidden="true" />
+        <marquee className="e-ticker-text">
+          Grid Alert: Scheduled maintenance in Kheri Block 10 PM–4 AM &nbsp;•&nbsp;
+          PM-Kisan Smart Grid Sync active for irrigation pumps &nbsp;•&nbsp;
+          Report power theft: Helpline 1912
+        </marquee>
       </div>
 
-      {/* TABS - Responsive Scrollable */}
-      <div className="row justify-content-center mb-4 px-2">
-        <div className="col-12 col-md-10 col-lg-8">
-          {/* Container: Mobile par padding-1 aur Laptop par padding-2 */}
-          <div className="d-flex justify-content-between justify-content-md-center gap-1 gap-md-2 bg-white p-1 p-md-2 rounded-pill shadow-sm border">
+      {/* Body */}
+      <div className="e-container e-body">
+        <div className="e-layout">
 
-            <button
-              onClick={() => setActiveTab("status")}
-              className={`btn flex-fill flex-md-grow-0 rounded-pill px-2 px-md-4 py-2 fw-bold text-nowrap transition-all border-0 ${activeTab === 'status' ? 'btn-success text-white shadow' : 'btn-light text-secondary'
-                }`}
-              style={{ fontSize: 'clamp(0.75rem, 3vw, 1rem)' }}
-            >
-              <Zap size={16} className="me-1 d-none d-sm-inline" /> Status
-            </button>
-
-            <button
-              onClick={() => setActiveTab("bill")}
-              className={`btn flex-fill flex-md-grow-0 rounded-pill px-2 px-md-4 py-2 fw-bold text-nowrap transition-all border-0 ${activeTab === 'bill' ? 'btn-success text-white shadow' : 'btn-light text-secondary'
-                }`}
-              style={{ fontSize: 'clamp(0.75rem, 3vw, 1rem)' }}
-            >
-              <Receipt size={16} className="me-1 d-none d-sm-inline" /> Bill
-            </button>
-
-            <button
-              onClick={() => setActiveTab("usage")}
-              className={`btn flex-fill flex-md-grow-0 rounded-pill px-2 px-md-4 py-2 fw-bold text-nowrap transition-all border-0 ${activeTab === 'usage' ? 'btn-success text-white shadow' : 'btn-light text-secondary'
-                }`}
-              style={{ fontSize: 'clamp(0.75rem, 3vw, 1rem)' }}
-            >
-              <BarChart3 size={16} className="me-1 d-none d-sm-inline" /> Usage
-            </button>
-
-          </div>
-        </div>
-      </div>
-
-      {/* MAIN CARD */}
-      <div className="card main-card shadow-sm border-0 rounded-4 overflow-hidden mb-4 mx-1">
-        <div className="card-header bg-dark text-white py-3 text-center border-0">
-          <span className="fw-bold small text-uppercase tracking-wider">
-            <MapPin size={16} className="me-2 text-warning" /> Location Verification
-          </span>
-        </div>
-
-        <div className="card-body p-3 p-md-5">
-          {error && <div className="alert alert-danger rounded-3 mb-4 d-flex align-items-center shadow-sm small">
-            <AlertTriangle size={18} className="me-2 flex-shrink-0" /> {error}
-          </div>}
-
-          {/* SELECTORS GRID */}
-          <div className="row g-3">
-            <div className="col-12 col-md-4">
-              <label className="form-label small fw-bold text-secondary">Country</label>
-              <select className="form-select form-select-md shadow-sm" value={countryId} onChange={(e) => setCountryId(e.target.value)}>
-                <option value="">Select</option>
-                {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div className="col-6 col-md-4">
-              <label className="form-label small fw-bold text-secondary">State</label>
-              <select className="form-select form-select-md shadow-sm" value={stateId} disabled={!countryId} onChange={(e) => setStateId(e.target.value)}>
-                <option value="">Select</option>
-                {states.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </div>
-            <div className="col-6 col-md-4">
-              <label className="form-label small fw-bold text-secondary">District</label>
-              <select className="form-select form-select-md shadow-sm" value={districtId} disabled={!stateId} onChange={(e) => setDistrictId(e.target.value)}>
-                <option value="">Select</option>
-                {districts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
-            </div>
-            <div className="col-12 col-md-6">
-              <label className="form-label small fw-bold text-success">Supply Center</label>
-              <select className="form-select form-select-md shadow-sm border-success border-opacity-25" value={centerId} disabled={!districtId} onChange={(e) => setCenterId(e.target.value)}>
-                <option value="">Select Center</option>
-                {centers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div className="col-12 col-md-6">
-              <label className="form-label small fw-bold text-success">Village</label>
-              <select className="form-select form-select-md shadow-sm border-success border-opacity-25" value={villageId} disabled={!centerId} onChange={(e) => setVillageId(e.target.value)}>
-                <option value="">Select Village</option>
-                {villages.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* STATUS SECTION */}
-          {activeTab === "status" && (
-            <div className="text-center mt-4">
-              <div className="row justify-content-center">
-                <div className="col-12 col-md-6 px-4">
-                  <button
-                    className="btn btn-success w-100 py-3 shadow-sm rounded-pill d-flex align-items-center justify-content-center fw-bold"
-                    onClick={handleCheck}
-                    disabled={isLoading || !villageId}
-                  >
-                    {isLoading ? <RefreshCw className="spinner-animation me-2" size={20} /> : <><Zap size={20} className="me-2" /> Check Status</>}
+          {/* Sidebar */}
+          <aside className="e-sidebar" aria-label="Quick links">
+            <nav className="e-card e-card--navy-top" aria-label="Status tools">
+              <h2 className="e-section-label">Status Tools</h2>
+              <ul className="e-nav-list" role="list">
+                <li>
+                  <button className="e-nav-btn e-nav-btn--active" aria-current="page">
+                    <Wifi size={15} aria-hidden="true" /> Track Village Grid
                   </button>
-                </div>
+                </li>
+                <li>
+                  <button className="e-nav-btn">
+                    <BarChart3 size={15} aria-hidden="true" /> Load Analytics
+                  </button>
+                </li>
+              </ul>
+            </nav>
+
+            <div className="e-helpline" role="complementary" aria-label="Helpline">
+              <Phone size={28} aria-hidden="true" />
+              <p className="e-helpline-label">Toll-Free Helpline</p>
+              <a href="tel:1912" className="e-helpline-number" aria-label="Call electricity helpline 1912">1912</a>
+              <p className="e-helpline-sub">For Electrical Complaints</p>
+            </div>
+          </aside>
+
+          {/* Main */}
+          <section className="e-main" aria-label="Electricity status checker">
+
+            {/* Filter panel */}
+            <div className="e-card e-card--navy-top">
+              <h2 className="e-card-heading">
+                <MapPin size={16} className="e-icon-red" aria-hidden="true" />
+                Select Your Location
+              </h2>
+
+              <div className="e-grid-4">
+                <FieldSelect
+                  id="state-select"
+                  label="राज्य (State)"
+                  value={s.stateId}
+                  options={s.states}
+                  onChange={(id) => dispatch({ type: "PICK_STATE", id })}
+                />
+                <FieldSelect
+                  id="district-select"
+                  label="जनपद (District)"
+                  value={s.districtId}
+                  options={s.districts}
+                  disabled={!s.stateId}
+                  onChange={(id) => dispatch({ type: "PICK_DISTRICT", id })}
+                />
+                <FieldSelect
+                  id="center-select"
+                  label="उप-केंद्र (Center)"
+                  value={s.centerId}
+                  options={s.centers}
+                  disabled={!s.districtId}
+                  onChange={(id) => dispatch({ type: "PICK_CENTER", id })}
+                />
+                <FieldSelect
+                  id="village-select"
+                  label="ग्राम (Village)"
+                  value={s.villageId}
+                  options={s.villages}
+                  disabled={!s.centerId}
+                  highlight
+                  onChange={(id) => dispatch({ type: "SET", payload: { villageId: id } })}
+                />
               </div>
 
-              {statusData && (
-                <div className="status-result mt-4 animate-fade-in px-2 px-md-0">
-                  {/* Step 1: Pehle status value nikal lo (Case insensitive aur Number safe) */}
-                  {(() => {
-                    // Status dhundne ke liye logic (chahe key 'status' ho ya 'Status')
-                    const rawStatus = Object.entries(statusData).find(([k]) => k.toLowerCase() === 'status')?.[1];
-                    const s = Number(rawStatus);
+              <div className="e-action-row">
+                {s.error && (
+                  <p className="e-error" role="alert" aria-live="assertive">
+                    <AlertTriangle size={14} aria-hidden="true" /> {s.error}
+                  </p>
+                )}
+                <button
+                  className="e-btn-primary"
+                  onClick={handleCheck}
+                  disabled={s.loading || !s.villageId}
+                  aria-label="Check electricity status"
+                >
+                  {s.loading
+                    ? <><RefreshCw size={16} className="e-spin" aria-hidden="true" /> Checking…</>
+                    : <><Zap size={16} aria-hidden="true" /> Fetch Status</>
+                  }
+                </button>
+              </div>
+            </div>
 
-                    // Card ka color decide karo
-                    const bannerClass = s === 1 ? "bg-success border-success text-white"
-                      : s === 2 ? "bg-warning border-warning text-dark"
-                        : s === 3 ? "bg-danger border-danger text-white"
-                          : "bg-secondary border-secondary text-white";
-
-                    return (
-                      <div
-                        className={`status-banner rounded-4 text-center border shadow-lg mx-auto transition-all p-3 p-md-4 ${bannerClass}`}
-                        style={{ maxWidth: '550px', width: '100%' }}
-                      >
-                        {Object.entries(statusData).map(([key, value]) => {
-                          if (value === null || value === '') return null;
-
-                          // --- 2. MATCHING THE KEY 'status' ---
-                          if (key.toLowerCase() === 'status') {
-                            const val = Number(value);
-                            return (
-                              <div key={key} className="mb-3">
-                                <div className={`d-inline-block rounded-circle p-3 mb-2 ${val === 2 ? "bg-dark bg-opacity-10" : "bg-white bg-opacity-25"
-                                  }`}>
-                                  <Zap size={32} className="pulse-animation" />
-                                </div>
-                                <h2 className="fs-3 fs-md-2 fw-bolder mb-0 tracking-tight">
-                                  {val === 1 ? "POWER ACTIVE" : val === 2 ? "MAINTENANCE" : val === 3 ? "POWER OFF" : "UNKNOWN"}
-                                </h2>
-                                <p className="small opacity-75 mb-0 fw-medium">
-                                  {val === 1 ? "🟢 Available" : val === 2 ? "🟠 Work in Progress" : val === 3 ? "🔴 Cut" : ""}
-                                </p>
-                              </div>
-                            );
-                          }
-
-                          // --- 3. MATCHING VILLAGE NAME ---
-                          if (key.toLowerCase() === 'villagename') {
-                            return (
-                              <div key={key} className="py-2 mb-3 border-top border-bottom border-white border-opacity-25 bg-black bg-opacity-10 rounded-2">
-                                <span className="fw-bold text-uppercase tracking-wider small">
-                                  📍 Village: {value}
-                                </span>
-                              </div>
-                            );
-                          }
-
-                          // --- 4. OTHER DATA ROWS ---
-                          const isDate = key.toLowerCase().includes('date') || key.toLowerCase().includes('updated');
-                          return (
-                            <div key={key} className="d-flex justify-content-between align-items-center py-2 border-bottom border-white border-opacity-10">
-                              <span className="small opacity-75 fw-bold text-uppercase text-start" style={{ fontSize: '0.65rem' }}>
-                                {formatKey(key)}
-                              </span>
-                              <span className="small fw-bolder text-end ms-2">
-                                {isDate ? new Date(value).toLocaleDateString() : value}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()}
-                </div>
+            {/* Result panel */}
+            <div className="e-card e-result-panel" aria-live="polite" aria-atomic="true">
+              {s.result ? (
+                <StatusResult data={s.result} />
+              ) : (
+                <EmptyState />
               )}
             </div>
-          )}
 
-          {/* BILL SECTION */}
-          {activeTab === "bill" && (
-            <div className="mt-4 animate-fade-in">
-              <div className="card border-0 shadow-sm rounded-4 bg-light overflow-hidden">
-                <div className="row g-0">
-                  <div className="col-12 col-lg-5 bg-success text-white p-4 d-flex flex-column justify-content-center">
-                    <h4 className="fw-bold mb-2">Bill Inquiry</h4>
-                    <p className="small opacity-75 mb-0">Get instant access to your electricity billing details.</p>
-                  </div>
-                  <div className="col-12 col-lg-7 bg-white p-4">
-                    <form className="row g-2 align-items-end" onSubmit={(e) => e.preventDefault()}>
-                      <div className="col-12 col-sm-8">
-                        <label className="form-label small fw-bold text-secondary">Consumer Number</label>
-                        <input type="text" className="form-control" placeholder="10-12 digit ID" />
-                      </div>
-                      <div className="col-12 col-sm-4">
-                        <button className="btn btn-success w-100 py-2 rounded-pill fw-bold">Fetch Bill</button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* USAGE SECTION */}
-          {activeTab === "usage" && (
-            <div className="mt-4 text-center animate-fade-in py-5 border rounded-4 bg-light">
-              <BarChart3 size={48} className="text-success opacity-25 mb-3" />
-              <h5 className="fw-bold">Consumption Analytics</h5>
-              <p className="text-muted small">Analytics will be available once your smart meter is linked.</p>
-            </div>
-          )}
+          </section>
         </div>
       </div>
 
-      {/* FOOTER WIDGETS */}
-      <div className="row g-3 px-2">
-        <div className="col-12 col-md-6 col-lg-3">
-          <div className="card h-100 border-0 shadow-sm p-3 border-start border-4 border-danger">
-            <h6 className="fw-bold mb-2 small"><Phone size={16} className="me-2 text-danger" /> Emergency</h6>
-            <strong className="text-danger fs-5">1912</strong>
-          </div>
-        </div>
-        <div className="col-12 col-md-6 col-lg-3">
-          <div className="card h-100 border-0 shadow-sm p-3 bg-dark text-white rounded-4">
-            <h6 className="fw-bold small mb-1"><Lightbulb size={16} className="me-2 text-warning" /> Power Grid</h6>
-            <small className="opacity-75">Status: Stable</small>
-          </div>
-        </div>
-        <div className="col-12 col-md-6 col-lg-6">
-          <div className="card h-100 border-0 shadow-sm p-3 bg-white border-top border-4 border-success">
-            <h6 className="fw-bold small"><ShieldCheck className="text-success me-2" size={16} /> Safety Reminder</h6>
-            <p className="extra-small text-muted mb-0">Never touch loose wires. Report hazards immediately to 1912.</p>
-          </div>
-        </div>
-      </div>
+      <style>{CSS}</style>
+    </main>
+  );
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+function FieldSelect({ id, label, value, options = [], disabled, highlight, onChange }) {
+  return (
+    <div className="e-field">
+      <label htmlFor={id} className="e-field-label">{label}</label>
+      <select
+        id={id}
+        className={`e-select ${highlight ? "e-select--highlight" : ""}`}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={label}
+      >
+        <option value="">Choose…</option>
+        {options.map((o) => (
+          <option key={o.id} value={o.id}>{o.name}</option>
+        ))}
+      </select>
     </div>
   );
-};
+}
 
-export default Electricity;
+function StatusResult({ data }) {
+  const statusCode = Number(
+    Object.entries(data).find(([k]) => k.toLowerCase() === "status")?.[1]
+  );
+  const theme = STATUS_MAP[statusCode] ?? DEFAULT_STATUS;
+  const { Icon } = theme;
+
+  const entries = Object.entries(data).filter(
+    ([k, v]) => k.toLowerCase() !== "status" && v != null && v !== ""
+  );
+
+  return (
+    <div className="e-result">
+      <div
+        className="e-status-banner"
+        style={{ background: theme.bg, borderColor: theme.border }}
+        role="status"
+        aria-label={`Electricity status: ${theme.text}`}
+      >
+        <span className="e-status-icon" style={{ color: theme.color }}>
+          <Icon size={22} aria-hidden="true" />
+        </span>
+        <div>
+          <p className="e-status-label" style={{ color: theme.border }}>{theme.label}</p>
+          <p className="e-status-village">
+            {data.villageName?.toUpperCase() ?? "VILLAGE"} — Grid Node Update
+          </p>
+        </div>
+      </div>
+
+      {entries.length > 0 && (
+        <dl className="e-data-grid">
+          {entries.map(([key, value]) => (
+            <div key={key} className="e-data-item">
+              <dt className="e-data-key">{toLabel(key)}</dt>
+              <dd className="e-data-val">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="e-empty" aria-label="Awaiting location selection">
+      <BarChart3 size={48} aria-hidden="true" />
+      <p className="e-empty-title">Waiting for Input</p>
+      <p className="e-empty-sub">
+        Select your state, district, supply center, and village, then tap Fetch Status.
+      </p>
+    </div>
+  );
+}
+
+// ─── CSS ──────────────────────────────────────────────────────────────────────
+const CSS = `
+  :root {
+    --navy: #000080;
+    --navy-dark: #00005a;
+    --saffron: #ff9933;
+    --success: #128807;
+    --success-bg: #e6f3e6;
+    --warn: #b45309;
+    --warn-bg: #fef3c7;
+    --danger: #c0392b;
+    --danger-bg: #fdf2f2;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: rgba(0,0,128,0.15);
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --radius: 4px;
+    --gap: 1.5rem;
+  }
+
+  /* Layout */
+  .e-root { background: var(--bg); min-height: 100vh; font-family: system-ui, sans-serif; color: var(--text); }
+  .e-container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+  @media (min-width: 768px) { .e-container { padding: 0 2rem; } }
+
+  /* Hero */
+  .e-hero {
+    background: linear-gradient(180deg, #fef2e0 0%, #fff 100%);
+    border-top: 3px solid var(--saffron);
+    padding: 1.5rem 0;
+  }
+  .e-hero-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .e-hero-title { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 800; color: var(--navy); margin: 0.25rem 0; }
+  .e-hero-sub { color: var(--text-muted); margin: 0; font-size: 0.9rem; }
+  .e-saffron { color: var(--saffron); }
+  .e-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px;
+    color: var(--navy); margin-bottom: 0.5rem;
+  }
+  .e-hero-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    background: #fff; border: 1px solid var(--border); padding: 6px 12px;
+    border-radius: 4px; color: var(--navy); white-space: nowrap;
+  }
+
+  /* Ticker */
+  .e-ticker { background: var(--navy); padding: 6px 1rem; display: flex; align-items: center; gap: 8px; }
+  .e-ticker-text { font-size: 0.78rem; color: rgba(255,255,255,0.85); flex: 1; }
+  .e-saffron-icon { color: var(--saffron); flex-shrink: 0; }
+
+  /* Layout */
+  .e-body { padding: 1.5rem 0 3rem; }
+  .e-layout { display: grid; gap: var(--gap); }
+  @media (min-width: 992px) {
+    .e-layout { grid-template-columns: 280px 1fr; align-items: start; }
+  }
+
+  /* Sidebar */
+  .e-sidebar { display: flex; flex-direction: column; gap: 1rem; }
+  @media (min-width: 992px) { .e-sidebar { position: sticky; top: 1rem; } }
+
+  /* Cards */
+  .e-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 1.25rem;
+  }
+  .e-card--navy-top { border-top: 4px solid var(--navy); }
+  .e-card-heading {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--navy); margin: 0 0 1rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .e-icon-red { color: #dc2626; }
+  .e-section-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--navy); margin: 0 0 0.75rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Nav list */
+  .e-nav-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .e-nav-btn {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; background: none; border: none; text-align: left; cursor: pointer;
+    font-size: 0.85rem; padding: 8px 4px; border-radius: 4px; color: var(--text-muted);
+    transition: background 0.15s, color 0.15s;
+  }
+  .e-nav-btn:hover { background: #f1f5f9; color: var(--navy); }
+  .e-nav-btn--active { color: var(--navy); font-weight: 700; }
+  .e-nav-btn--active svg { color: var(--saffron); }
+
+  /* Helpline card */
+  .e-helpline {
+    background: var(--navy); color: #fff;
+    border-radius: var(--radius); padding: 1.25rem;
+    text-align: center; border-left: 4px solid var(--saffron);
+  }
+  .e-helpline svg { color: var(--saffron); margin-bottom: 0.5rem; }
+  .e-helpline-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 0.25rem 0; }
+  .e-helpline-number {
+    display: block; font-size: 2rem; font-weight: 800;
+    color: #fff; text-decoration: none; line-height: 1;
+  }
+  .e-helpline-number:hover { color: var(--saffron); }
+  .e-helpline-sub { font-size: 0.6rem; text-transform: uppercase; color: rgba(255,255,255,0.5); margin: 0.25rem 0 0; }
+
+  /* Form grid */
+  .e-grid-4 { display: grid; gap: 0.75rem; grid-template-columns: 1fr; }
+  @media (min-width: 480px) { .e-grid-4 { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 900px) { .e-grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+  /* Field */
+  .e-field { display: flex; flex-direction: column; gap: 4px; }
+  .e-field-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--navy); }
+  .e-select {
+    height: 40px; font-size: 0.85rem; padding: 0 10px;
+    border: 1px solid var(--border); border-radius: 2px;
+    background: #fff; color: var(--text); cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: auto;
+  }
+  .e-select:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,0,128,0.2); border-color: var(--navy); }
+  .e-select:disabled { background: #f8fafc; color: var(--text-muted); cursor: not-allowed; }
+  .e-select--highlight { border-color: var(--saffron); border-width: 1.5px; }
+
+  /* Action row */
+  .e-action-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+  .e-error { display: flex; align-items: center; gap: 6px; color: #dc2626; font-size: 0.78rem; font-weight: 600; margin: 0; flex: 1 1 100%; }
+  .e-btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--navy); color: #fff; border: none; border-radius: 2px;
+    font-size: 0.85rem; font-weight: 700; padding: 0 1.25rem; height: 40px;
+    cursor: pointer; transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .e-btn-primary:hover:not(:disabled) { background: var(--navy-dark); }
+  .e-btn-primary:active:not(:disabled) { transform: scale(0.98); }
+  .e-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .e-btn-primary svg:first-child { color: var(--saffron); }
+  .e-spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Result panel */
+  .e-result-panel { min-height: 320px; }
+  .e-result { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Status banner */
+  .e-status-banner {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1rem 1.25rem; border-left: 4px solid; border-radius: 2px; margin-bottom: 1rem;
+  }
+  .e-status-icon { flex-shrink: 0; margin-top: 2px; }
+  .e-status-label { font-size: 1.1rem; font-weight: 800; margin: 0 0 2px; }
+  .e-status-village { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin: 0; }
+
+  /* Data grid */
+  .e-data-grid { display: grid; gap: 6px; grid-template-columns: 1fr; margin: 0; }
+  @media (min-width: 600px) { .e-data-grid { grid-template-columns: 1fr 1fr; } }
+  .e-data-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 2px;
+  }
+  .e-data-key { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin: 0; }
+  .e-data-val { font-size: 0.85rem; font-weight: 700; color: var(--navy); margin: 0; }
+
+  /* Empty state */
+  .e-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 3rem 1rem; color: #94a3b8; text-align: center;
+  }
+  .e-empty-title { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; margin: 0.75rem 0 0.25rem; color: #94a3b8; }
+  .e-empty-sub { font-size: 0.8rem; max-width: 320px; margin: 0; color: #cbd5e1; line-height: 1.5; }
+
+  /* Main area stacking */
+  .e-main { display: flex; flex-direction: column; gap: 1rem; }
+`;

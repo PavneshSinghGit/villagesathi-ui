@@ -1,0 +1,29 @@
+# VillageSathi Robots.txt - Optimized for SEO
+User-agent: *
+
+# Allow important public sections
+Allow: /
+Allow: /sathi-market
+Allow: /Blog
+Allow: /services/
+
+# Disallow Private & Auth Pages (SEO ke liye zaroori nahi)
+Disallow: /admin/
+Disallow: /customer-login/
+Disallow: /customer-register/
+Disallow: /customer-dashboard/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /wishlist/
+Disallow: /my-orders/
+
+# Backend & Data API
+Disallow: /api/
+Disallow: /wwwroot/
+
+# Prevent crawling of internal search result pages (Crawler trap)
+Disallow: /*?search=
+Disallow: /*?searchTerm=
+
+# Sitemap Link
+Sitemap: https://www.villagesathi.in/sitemap.xml

@@ -7,9 +7,7 @@ const UserLayout = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 selection:bg-warning selection:text-dark">
       {/* NAVBAR SECTION */}
-      <header className="sticky top-0 z-50 shadow-sm bg-white">
         <Navbar />
-      </header>
 
       {/* MAIN CONTENT AREA */}
       <main className="flex-grow flex flex-col transition-all duration-300 ease-in-out">

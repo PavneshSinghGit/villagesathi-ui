@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import { 
+    Save, FileText, Link as LinkIcon, Tag, User, Image as ImageIcon, 
+    Globe, CheckCircle, Loader2, Edit, Plus 
+} from 'lucide-react';
 
 const CATEGORIES = ["Agriculture", "Government Schemes", "Rural Development", "News", "General"];
 
@@ -18,37 +22,50 @@ const BlogForm = ({ blog, onClose, refresh }) => {
     authorName: "Admin",
     isActive: true
   });
+  
   const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      ['link', 'clean']
-    ],
-  };
-
+  // 1. useEffect ko simplify kiya taaki data stable rahe
   useEffect(() => {
     if (blog) {
       setFormData({
         title: blog.title || blog.Title || "",
-        content: blog.content || blog.Content || "",
         shortDescription: blog.shortDescription || blog.ShortDescription || "",
+        content: blog.content || blog.Content || "",
         category: blog.category || blog.Category || "General",
         metaDescription: blog.metaDescription || blog.MetaDescription || "",
         slug: blog.slug || blog.Slug || "",
         authorName: blog.authorName || blog.AuthorName || "Admin",
-        isActive: blog.isActive !== undefined ? blog.isActive : (blog.IsActive !== undefined ? blog.IsActive : true)
+        isActive: blog.isActive ?? blog.IsActive ?? true
       });
     }
   }, [blog]);
 
+  // 2. Optimized Title Change (Prevents wiping other fields)
   const handleTitleChange = (e) => {
     const val = e.target.value;
-    const generatedSlug = val.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-    setFormData({ ...formData, title: val, slug: generatedSlug });
+    const generatedSlug = val
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '');
+    
+    // Yahan prev state ka use karna zaroori hai taaki baki data delete na ho
+    setFormData(prev => ({ 
+      ...prev, 
+      title: val, 
+      slug: generatedSlug 
+    }));
+  };
+
+  // 3. Generic Input Handler for all other fields
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -85,161 +102,118 @@ const BlogForm = ({ blog, onClose, refresh }) => {
     data.append("CreatedDate", blog ? (blog.createdDate || blog.CreatedDate) : new Date().toISOString());
 
     try {
-      const url = blog
-        ? `${API_BASE_URL}/Blogs/UpdateBlog/${currentId}`
-        : `${API_BASE_URL}/Blogs`;
+      const url = blog ? `${API_BASE_URL}/Blogs/UpdateBlog/${currentId}` : `${API_BASE_URL}/Blogs`;
+      await axios.post(url, data, { headers: { "Content-Type": "multipart/form-data" } });
 
-      await axios({
-        method: "POST",
-        url: url,
-        data: data,
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-
-      alert(blog ? "Blog updated successfully!" : "Blog published successfully!");
+      alert(blog ? "Updated!" : "Published!");
       if (refresh) refresh();
-      if (onClose) onClose();
+      onClose();
     } catch (err) {
-      console.error("Submission Error:", err);
-      alert("Failed to save the blog.");
+      console.error(err);
+      alert("Failed to save.", err);
+      console.error("Error details:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1050 }}>
-      <div className="modal-dialog modal-xl border-0 shadow-lg">
-        <div className="modal-content border-0">
+    <div className="modal show d-block" style={{ backgroundColor: 'rgba(15, 23, 42, 0.85)', zIndex: 1060 }}>
+      <div className="modal-dialog modal-xl modal-dialog-centered border-0">
+        <div className="modal-content border-0 overflow-hidden" style={{ borderRadius: '24px' }}>
           <form onSubmit={handleSubmit}>
-            <div className="modal-header bg-dark text-white py-3">
-              <h5 className="modal-title fw-bold">
-                {blog ? "📝 Edit Blog Post" : "🆕 Create New Blog Post"}
-              </h5>
+            <div className="modal-header border-0 px-4 py-3 bg-dark text-white">
+              <h5 className="modal-title fw-bold">{blog ? "Edit Article" : "New Article"}</h5>
               <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
             </div>
 
-            <div className="modal-body p-4" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-              <div className="row">
-                {/* Left Column: Editor & Main Fields */}
-                <div className="col-md-8">
+            <div className="modal-body p-0" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+              <div className="row g-0">
+                {/* Left Side */}
+                <div className="col-lg-8 p-4 bg-white border-end">
                   <div className="mb-4">
-                    <label className="form-label fw-bold">Blog Title</label>
+                    <label className="fw-bold small text-muted mb-2">TITLE</label>
                     <input
+                      name="title"
                       type="text"
-                      className="form-control form-control-lg border-2"
+                      className="form-control form-control-lg"
                       value={formData.title}
                       onChange={handleTitleChange}
-                      placeholder="Enter title..."
                       required
                     />
                   </div>
 
-                  <div className="mb-4">
-                    <label className="form-label fw-bold">Content</label>
-                    <div style={{ marginBottom: '60px' }}>
+                  <div className="mb-3">
+                    <label className="fw-bold small text-muted mb-2">CONTENT</label>
+                    <div style={{ height: '350px', marginBottom: '50px' }}>
                       <ReactQuill
                         theme="snow"
                         value={formData.content}
-                        onChange={(val) => setFormData({ ...formData, content: val })}
-                        modules={modules}
-                        style={{ height: '350px' }}
+                        onChange={(val) => setFormData(prev => ({ ...prev, content: val }))}
+                        style={{ height: '300px' }}
                       />
                     </div>
                   </div>
 
-                  <div className="mb-3 mt-5">
-                    <label className="form-label fw-bold">Short Description</label>
+                  <div className="mt-5">
+                    <label className="fw-bold small text-muted mb-2">EXCERPT</label>
                     <textarea
+                      name="shortDescription"
                       className="form-control"
-                      rows="3"
+                      rows="2"
                       value={formData.shortDescription}
-                      onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
-                      placeholder="Briefly describe the blog for the listing page..."
+                      onChange={handleChange}
                     />
                   </div>
                 </div>
 
-                {/* Right Column: Settings & SEO */}
-                <div className="col-md-4 bg-light p-4 rounded border-start">
+                {/* Right Side Settings */}
+                <div className="col-lg-4 p-4 bg-light">
                   <div className="mb-3">
-                    <label className="form-label fw-bold text-primary">URL Slug</label>
-                    <input
-                      type="text"
-                      className="form-control form-control-sm"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                      required
-                    />
+                    <label className="fw-bold small text-muted mb-1">SLUG</label>
+                    <input name="slug" className="form-control" value={formData.slug} onChange={handleChange} />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Category</label>
-                    <select
-                      className="form-select"
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    >
-                      {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
+                    <label className="fw-bold small text-muted mb-1">CATEGORY</label>
+                    <select name="category" className="form-select" value={formData.category} onChange={handleChange}>
+                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Author Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.authorName}
-                      onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
-                    />
+                    <label className="fw-bold small text-muted mb-1">AUTHOR</label>
+                    <input name="authorName" className="form-control" value={formData.authorName} onChange={handleChange} />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Featured Image</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      onChange={(e) => setImageFile(e.target.files[0])}
-                      accept="image/*"
-                    />
-                    {(blog && (blog.imageUrl || blog.ImageUrl)) && (
-                      <div className="mt-2">
-                        <small className="text-muted d-block text-truncate">Current: {blog.imageUrl || blog.ImageUrl}</small>
-                      </div>
-                    )}
+                    <label className="fw-bold small text-muted mb-1">FEATURED IMAGE</label>
+                    <input type="file" className="form-control" onChange={(e) => setImageFile(e.target.files[0])} />
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">SEO Meta Description</label>
-                    <textarea
-                      className="form-control"
-                      rows="4"
-                      value={formData.metaDescription}
-                      onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
-                      placeholder="SEO description for search engines..."
-                    />
+                    <label className="fw-bold small text-muted mb-1">SEO DESCRIPTION</label>
+                    <textarea name="metaDescription" className="form-control" rows="3" value={formData.metaDescription} onChange={handleChange} />
                   </div>
 
-                  <div className="form-check form-switch mt-4">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      id="isActiveSwitch"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  <div className="form-check form-switch p-3 border rounded bg-white mt-4">
+                    <label className="form-check-label fw-bold">Live Status</label>
+                    <input 
+                      name="isActive"
+                      className="form-check-input float-end" 
+                      type="checkbox" 
+                      checked={formData.isActive} 
+                      onChange={handleChange} 
                     />
-                    <label className="form-check-label fw-bold" htmlFor="isActiveSwitch">Publish Article</label>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="modal-footer border-top bg-light">
-              <button type="button" className="btn btn-secondary px-4" onClick={onClose}>Cancel</button>
-              <button type="submit" className="btn btn-primary px-5 fw-bold" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : (blog ? "Update Blog" : "Publish Now")}
+            <div className="modal-footer bg-light">
+              <button type="button" className="btn btn-secondary" onClick={onClose}>Discard</button>
+              <button type="submit" className="btn btn-primary px-4" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

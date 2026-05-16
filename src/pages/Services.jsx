@@ -1,122 +1,211 @@
 import React from "react";
 import {
-  Zap, Landmark, Sprout, HeartPulse, GraduationCap, Truck, ArrowRight
+  Zap, Landmark, Sprout, HeartPulse, GraduationCap, ShoppingBag, 
+  ChevronRight, HelpCircle, CheckCircle, Info
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import "../styles/userStyles.css";
 import { Helmet } from "react-helmet-async";
+
 function Services() {
   const allServices = [
     {
-      title: "Electricity Services",
-      desc: "Monitor real-time power supply status, pay utility bills, and report electrical faults seamlessly.",
-      icon: <Zap size={30} />,
-      color: "text-warning",
-      bg: "bg-warning-light",
+      title: "साथी मार्केट (SathiMarket)",
+      desc: "Buy fresh produce and handmade goods directly from rural artisans and local village shops.",
+      icon: <ShoppingBag size={24} />,
+      color: "#ff9933", // Saffron
+      bg: "#fff4e6",
+      path: "/sathi-market",
+      featured: true
+    },
+    {
+      title: "बिजली ट्रैकिंग (Power Tracker)",
+      desc: "Monitor real-time power supply status and report electrical faults within your region using IoT data.",
+      icon: <Zap size={24} />,
+      color: "#000080", // Navy Blue
+      bg: "#f1f5f9",
       path: "/services/electricity"
     },
     {
-      title: "Government Schemes",
-      desc: "Access simplified details on PM-Kisan, Awas Yojana, and Ration Card updates directly from official sources.",
-      icon: <Landmark size={30} />,
-      color: "text-primary",
-      bg: "bg-primary-light",
+      title: "सरकारी योजनाएं (Govt. Schemes)",
+      desc: "Simplified access to PM-Kisan, Awas Yojana, and verified scheme alerts for your profile.",
+      icon: <Landmark size={24} />,
+      color: "#128807", // Green
+      bg: "#e6f3e6",
       path: "/services/GovernmentSchemes"
     },
     {
-      title: "Smart Farming",
-      desc: "Get digital soil health cards, AI-driven crop suggestions, and live Mandi (Market) price tracking.",
-      icon: <Sprout size={30} />,
-      color: "text-success",
-      bg: "bg-success-light",
+      title: "स्मार्ट खेती (Smart Farming)",
+      desc: "AI-driven crop suggestions, soil monitoring, and real-time Mandi price tracking.",
+      icon: <Sprout size={24} />,
+      color: "#128807",
+      bg: "#e6f3e6",
       path: "/services/FarmerHelp"
     },
     {
-      title: "Healthcare Connect",
-      desc: "Find verified government medical centers, check doctor schedules, and request emergency assistance.",
-      icon: <HeartPulse size={30} />,
-      color: "text-danger",
-      bg: "bg-danger-light",
+      title: "स्वास्थ्य कनेक्ट (Health Connect)",
+      desc: "Locate medical centers, book appointments, and access 24/7 emergency ambulance contacts.",
+      icon: <HeartPulse size={24} />,
+      color: "#d9534f", // Emergency Red
+      bg: "#fdf2f2",
       path: "/services/healthcare"
     },
     {
-      title: "Digital Education",
-      desc: "Empowering rural youth with free skill development courses, digital literacy, and scholarship alerts.",
-      icon: <GraduationCap size={30} />,
-      color: "text-info",
-      bg: "bg-info-light",
+      title: "डिजिटल शिक्षा (Digital Education)",
+      desc: "Free skill development courses for rural youth and digital literacy workshops.",
+      icon: <GraduationCap size={24} />,
+      color: "#000080",
+      bg: "#f1f5f9",
       path: "/services/education"
-    },
-    {
-      title: "Village Logistics",
-      desc: "Track regional transport, manage farm-to-market supply chains, and coordinate rural deliveries.",
-      icon: <Truck size={30} />,
-      color: "text-secondary",
-      bg: "bg-secondary-light",
-      path: "/services/logistics"
     }
   ];
 
   return (
-    <div className="services-page py-5 bg-light">
+    <main className="animate-fade-in pb-5" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <Helmet>
-        <title>Our Services | VillageSathi - Digital Solutions for Rural India</title>
-        <meta name="description" content="Explore the range of digital services offered by VillageSathi to empower rural communities." />
+        <title>Official Services Portal | VillageSathi Digital Bharat Mission</title>
+        <meta name="description" content="Access verified digital services including SathiMarket, Sarkari Yojana Hub, and IoT Power Tracking." />
       </Helmet>
-      {/* --- HEADER SECTION --- */}
-      <div className="container text-center mb-5">
-        <h6 className="text-success fw-bold text-uppercase tracking-widest mb-2" style={{ letterSpacing: '2px' }}>
-          Empowering Communities
-        </h6>
-        <h2 className="display-5 fw-bold text-dark mb-3">Unified Digital Solutions</h2>
-        <div className="underline mx-auto mb-4" style={{ width: '60px', height: '4px', backgroundColor: '#198754', borderRadius: '2px' }}></div>
-        <p className="text-muted fs-5 mx-auto" style={{ maxWidth: '800px' }}>
-          VillageSathi bridges the digital divide by providing essential services tailored for the
-          unique needs of rural India. Experience governance and growth in your pocket.
-        </p>
-      </div>
+
+      {/* --- OFFICIAL GOVT HERO --- */}
+      <header className="services-hero-govt py-5 position-relative">
+        <div className="container px-4 text-center">
+          <div className="d-inline-flex align-items-center govt-badge px-3 py-1 mb-3">
+            <span className="small fw-bold">डिजिटल सेवा केंद्र | Digital Service Centre</span>
+          </div>
+          <h1 className="govt-title mb-2">
+            Unified <span className="text-saffron">Digital</span> Solutions for <span className="text-green">Rural Bharat</span>
+          </h1>
+          <p className="govt-subtitle mx-auto mb-0" style={{ maxWidth: '750px' }}>
+            VillageSathi bridges the information gap by bringing governance, commerce, and essential utilities directly to your village doorstep through a single window.
+          </p>
+        </div>
+      </header>
+
+      {/* --- OFFICIAL STATUS BAR --- */}
+      <section className="bg-navy py-2 shadow-sm text-white">
+        <div className="container px-4 d-flex align-items-center gap-2">
+          <Info size={16} className="text-saffron" />
+          <marquee className="small fw-medium opacity-90">
+            Official Announcement: New Agri-Input Calculators are now live • Register as a SathiMarket Vendor to sell produce directly • Verified PM-Kisan status tracking active.
+          </marquee>
+        </div>
+      </section>
 
       {/* --- SERVICES GRID --- */}
-      <div className="container">
+      <section className="container-fluid px-md-5 mt-5">
         <div className="row g-4">
           {allServices.map((service, index) => (
-            <div className="col-lg-4 col-md-6" key={index}>
-              <div className="service-card-premium h-100 p-4 shadow-sm border-0 rounded-4 bg-white transition-all hover-shadow-lg">
-                <div className={`icon-circle mb-4 rounded-circle d-flex align-items-center justify-content-center ${service.bg} ${service.color}`} style={{ width: '65px', height: '65px' }}>
-                  {service.icon}
+            <div className="col-xl-4 col-md-6" key={index}>
+              <div className="govt-service-card h-100 bg-white border shadow-sm p-4 position-relative overflow-hidden transition-hover">
+                {service.featured && <div className="govt-featured-label">LIVE & POPULAR</div>}
+                
+                <div className="d-flex align-items-center gap-3 mb-3">
+                  <div className="icon-wrap-govt d-flex align-items-center justify-content-center" 
+                       style={{ backgroundColor: service.bg, color: service.color }}>
+                    {service.icon}
+                  </div>
+                  <h5 className="fw-bold text-navy mb-0">{service.title}</h5>
                 </div>
-                <h4 className="fw-bold mb-3 text-dark">{service.title}</h4>
-                <p className="text-muted mb-4 leading-relaxed" style={{ fontSize: '0.95rem' }}>{service.desc}</p>
+                
+                <p className="text-muted small mb-4 lh-base" style={{ minHeight: '3.6rem' }}>
+                  {service.desc}
+                </p>
 
-                <Link to={service.path} className="btn btn-link p-0 fw-bold text-decoration-none text-success d-flex align-items-center gap-2 group">
-                  <span>Explore Service</span>
-                  <ArrowRight className="transition-transform group-hover-translate-x-1" size={18} />
+                <Link to={service.path} className="btn btn-navy-outline w-100 rounded-1 py-2 fw-bold small d-flex align-items-center justify-content-center gap-2">
+                  Access Service <ChevronRight size={16} />
                 </Link>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* --- CALL TO ACTION --- */}
-      <div className="container mt-5 pt-5">
-        <div className="cta-banner p-5 rounded-5 text-center text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #1a5d1a 0%, #2c7a2c 100%)' }}>
-          <h3 className="fw-bold mb-3 h2">Need a Specific Service?</h3>
-          <p className="mb-4 opacity-75 fs-5">
-            We are constantly expanding our ecosystem. Suggest a new digital service
-            to help your village grow faster!
-          </p>
-          <div className="d-flex justify-content-center gap-3">
-            <button className="btn btn-light btn-lg px-5 fw-bold rounded-pill text-success shadow-sm">
-              Contact Support
-            </button>
-            <button className="btn btn-outline-light btn-lg px-5 fw-bold rounded-pill">
-              Feedback Form
-            </button>
+      {/* --- GOVT HELP REQUEST SECTION --- */}
+      <section className="container-fluid px-md-5 mt-5">
+        <div className="p-4 bg-white border border-left-saffron shadow-sm text-center text-lg-start">
+          <div className="row align-items-center">
+            <div className="col-lg-1 d-none d-lg-block">
+               <HelpCircle size={48} className="text-navy opacity-20" />
+            </div>
+            <div className="col-lg-7 mb-3 mb-lg-0">
+               <h4 className="fw-bold text-navy mb-1">Custom Digital Service Request?</h4>
+               <p className="small text-muted mb-0">If your Gram Panchayat requires a specific digital tool or tracker, submit an official request.</p>
+            </div>
+            <div className="col-lg-4 text-lg-end">
+               <button className="btn btn-govt-secondary rounded-1 px-4 fw-bold">Request Service Tool</button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <style>{`
+        /* Official Color Palette */
+        .text-saffron { color: #ff9933; }
+        .text-green { color: #128807; }
+        .text-navy { color: #000080; }
+        .bg-navy { background-color: #000080; }
+        
+        /* Hero Styling */
+        .services-hero-govt {
+          background-color: #ffffff;
+          background-image: linear-gradient(180deg, #fef2e0 0%, #ffffff 100%);
+          border-top: 3px solid #ff9933;
+        }
+        .govt-badge { background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; border-radius: 4px; }
+        .govt-title { font-weight: 800; font-size: 2.2rem; color: #000080; }
+        .govt-subtitle { color: #475569; font-size: 1rem; line-height: 1.6; }
+
+        /* Card Styling */
+        .govt-service-card {
+          border-radius: 4px;
+          border: 1px solid #e2e8f0;
+          transition: all 0.3s ease;
+        }
+        .govt-service-card:hover {
+          border-color: #ff9933;
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0,0,128,0.05) !important;
+        }
+        .icon-wrap-govt {
+          width: 50px;
+          height: 50px;
+          border-radius: 8px;
+        }
+        .border-left-saffron { border-left: 6px solid #ff9933 !important; }
+        
+        /* Labels & Buttons */
+        .govt-featured-label {
+          position: absolute;
+          top: 0;
+          right: 0;
+          background: #ff9933;
+          color: white;
+          font-size: 0.6rem;
+          font-weight: 800;
+          padding: 4px 12px;
+          border-bottom-left-radius: 8px;
+        }
+        .btn-navy-outline {
+          border: 1px solid #000080;
+          color: #000080;
+          transition: 0.2s;
+        }
+        .btn-navy-outline:hover {
+          background: #000080;
+          color: white;
+        }
+        .btn-govt-secondary {
+          background-color: #ff9933;
+          color: white;
+          border: none;
+        }
+
+        @media (max-width: 768px) {
+          .govt-title { font-size: 1.7rem !important; }
+          .btn { width: 100%; margin-bottom: 5px; }
+        }
+      `}</style>
+    </main>
   );
 }
 

@@ -1,730 +1,361 @@
-/* --- 0. GLOBAL VARIABLES & ANIMATIONS --- */
+/* 
+    VillageSathi Premium Unified Theme 
+    Scope: Home, About, Services, SathiMarket, Contact, Blog
+    Upgraded with Glassmorphism, Soft Shadows, and Premium Micro-interactions
+*/
+
+/* --- 1. GLOBAL VARIABLES & PREMIUM SETUP --- */
 :root {
+    /* Primary Brand Colors - Government Authority */
     --gov-navy: #003366;
     --gov-blue: #00509d;
-    --gov-green: #198754;
-    --gov-orange: #ff9933;
-    --text-dark: #1e293b;
+    --gov-green: #15803d; /* Slightly deeper for premium contrast */
+    
+    /* SathiMarket & Secondary Accents */
+    --gov-orange: #f97316; /* Vibrant Premium Orange */
+    --market-gold: #fbbf24;
+    --market-warm: #fffbeb;
+    
+    /* UI Neutrals & Backgrounds */
+    --text-dark: #0f172a;
+    --text-muted: #475569;
     --bg-light: #f8fafc;
+    --white: #ffffff;
+    --text-orange: #f97316;
+
+    /* Premium Shadows & Glows */
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 30px rgba(0, 17, 51, 0.08);
+    --shadow-lg: 0 20px 40px rgba(0, 17, 51, 0.12);
+    --shadow-hover: 0 25px 50px rgba(0, 51, 102, 0.15);
+    --glow-orange: 0 8px 25px rgba(249, 115, 22, 0.35);
+    --glow-navy: 0 8px 25px rgba(0, 51, 102, 0.3);
+    
+    /* System */
+    --transition-fast: all 0.2s ease;
+    --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Apple-like smooth easing */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+}
+
+/* --- 2. GLOBAL ANIMATIONS & SMOOTHING --- */
+body {
+    color: var(--text-dark);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--white);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(30px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.animate-fade-in {
-    animation: fadeInUp 0.8s ease-out forwards;
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
 }
 
-.text-success {
-    color: var(--gov-navy) !important;
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
 }
 
-.btn-success {
-    color: #fff5eb !important;
-    background-color: var(--gov-navy) !important;
-}
+.animate-fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.floating-img { animation: float 6s ease-in-out infinite; }
+.pulse-soft { animation: pulse-glow 3s infinite; }
 
-/* --- 1. HERO SECTION --- */
-.hero-section {
-    padding: 80px 0;
-    border-bottom: 5px solid var(--gov-orange);
-    background: linear-gradient(180deg, #ffffff 0%, #f0f4f8 100%);
-    background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-}
-
-.gov-badge {
-    display: inline-block;
-    background: #eef2f7;
-    padding: 8px 20px;
-    border-radius: 50px;
-    border-left: 4px solid var(--gov-navy);
-}
-
-.badge-text {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--gov-navy);
-    text-transform: uppercase;
-}
-
-.hero-title {
-    color: var(--gov-navy);
-    letter-spacing: -1px;
-}
-
-.text-accent {
-    color: var(--gov-orange);
+/* --- 3. PREMIUM BUTTONS & UI COMPONENTS --- */
+.text-success { color: var(--gov-navy) !important; }
+.text-accent { 
+    background: linear-gradient(135deg, var(--gov-orange), #ea580c);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
 }
 
 .btn-gov-primary {
-    background-color: var(--gov-navy);
+    background: linear-gradient(135deg, var(--gov-navy) 0%, var(--gov-blue) 100%);
     color: white !important;
-    border-radius: 4px;
-    transition: all 0.3s ease;
+    border-radius: 50px; /* Pill shape for premium feel */
+    padding: 14px 32px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: var(--transition-smooth);
+    border: none;
+    box-shadow: var(--shadow-md);
 }
 
 .btn-gov-primary:hover {
-    background-color: var(--gov-blue);
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--glow-navy);
+}
+
+.btn-gov-primary:active {
+    transform: translateY(1px);
 }
 
 .btn-gov-outline {
     border: 2px solid var(--gov-navy);
     color: var(--gov-navy);
-    border-radius: 4px;
+    background: transparent;
+    border-radius: 50px;
+    padding: 12px 30px;
     font-weight: 700;
+    transition: var(--transition-smooth);
 }
 
-/* --- 2. ABOUT THE MISSION --- */
-.section-title {
-    font-weight: 800;
-    color: var(--gov-navy);
+.btn-gov-outline:hover {
+    background: var(--gov-navy);
+    color: white !important;
+    box-shadow: var(--glow-navy);
 }
 
-.section-title span {
-    color: var(--gov-green);
+/* Glassmorphism Utility */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-.check-icon {
-    color: var(--gov-green);
-}
-
-.gov-image-container {
+/* --- 4. HOME & HERO SECTIONS --- */
+.hero-section {
+    background: radial-gradient(circle at top right, #f0f7ff 0%, #ffffff 60%);
     position: relative;
-    padding: 10px;
+    border-bottom: none; /* Removed harsh border for modern look */
 }
 
-.floating-stat {
+.hero-section::after {
+    content: '';
     position: absolute;
-    bottom: 20px;
-    left: -10px;
-    background: white;
-    padding: 15px 25px;
-    border-left: 5px solid var(--gov-green);
-    display: flex;
-    flex-direction: column;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gov-navy), var(--gov-blue), var(--gov-orange));
 }
 
-.stat-number {
-    font-size: 26px;
-    font-weight: 800;
-    color: var(--gov-green);
-}
-
-.stat-label {
-    font-size: 10px;
+.gov-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--glass-panel);
+    padding: 8px 24px;
+    border-radius: 50px;
+    border: 1px solid rgba(0, 51, 102, 0.1);
+    box-shadow: var(--shadow-sm);
+    color: var(--gov-navy);
     font-weight: 700;
-    color: #64748b;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
-/* --- 3. HOW IT WORKS --- */
-.how-it-works {
-    background-color: var(--bg-light);
-}
-
-.step-card {
-    background: white;
-    padding: 40px 30px;
-    border-bottom: 3px solid #e2e8f0;
-    transition: border-color 0.3s;
-}
-
-.step-card:hover {
-    border-bottom-color: var(--gov-orange);
-}
-
-.step-num {
-    font-size: 45px;
-    font-weight: 800;
-    color: #dee2e6;
-    line-height: 1;
-    margin-bottom: 15px;
-}
-
-/* --- 4. SERVICES GRID --- */
-.service-card {
-    transition: all 0.3s ease;
-    border-top: 4px solid #dee2e6 !important;
-}
-
-.service-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08) !important;
-}
-
-.icon-circle {
-    width: 55px;
-    height: 55px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    font-size: 24px;
-}
-
-/* Service Box Colors */
-.border-top-blue {
-    border-top-color: #0d6efd !important;
-}
-
-.border-top-green {
-    border-top-color: var(--gov-green) !important;
-}
-
-.border-top-orange {
-    border-top-color: var(--gov-orange) !important;
-}
-
-.border-top-red {
-    border-top-color: #dc3545 !important;
-}
-
-.border-top-teal {
-    border-top-color: #20c997 !important;
-}
-
-.border-top-navy {
-    border-top-color: var(--gov-navy) !important;
-}
-
-.bg-blue-soft {
-    background-color: #e7f1ff;
-}
-
-.bg-green-soft {
-    background-color: #e1f2e9;
-}
-
-.bg-orange-soft {
-    background-color: #fff5eb;
-}
-
-.bg-red-soft {
-    background-color: #fceaea;
-}
-
-.bg-teal-soft {
-    background-color: #e9faf4;
-}
-
-.bg-navy-soft {
-    background-color: #e6ebf0;
-}
-
-.text-blue {
-    color: #0d6efd;
-}
-
-.text-green {
-    color: var(--gov-green);
-}
-
-.text-orange {
-    color: var(--gov-orange);
-}
-
-.text-red {
-    color: #dc3545;
-}
-
-.text-teal {
-    color: #20c997;
-}
-
-.text-navy {
-    color: var(--gov-navy);
-}
-
-/* --- 5. STATISTICS STRIP --- */
-.stats-strip {
-    background-color: var(--gov-navy);
-    color: white;
-    background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.1) 25%, transparent 25%);
-    background-size: 4px 4px;
-}
-
-/* --- 6. CALL TO ACTION (CTA) --- */
-.cta-box {
-    background: linear-gradient(135deg, var(--gov-navy) 0%, var(--gov-blue) 100%);
-    color: white;
-}
-
-.btn-gov-accent {
-    background-color: var(--gov-orange);
-    color: white;
-    border-radius: 0 4px 4px 0;
-    transition: background 0.3s;
-}
-
-.btn-gov-accent:hover {
-    background-color: #e67e22;
-    color: white;
-}
-
-/* --- 7. FOOTER --- */
-.footer-gov {
-    background-color: #001a33;
-    border-top: 4px solid var(--gov-orange);
-    background-image: url(https://www.transparenttextures.com/patterns/cubes.png) !important;
-}
-
-.footer-links a {
-    color: #cbd5e1;
-    text-decoration: none;
-    font-size: 14px;
-    transition: all 0.2s;
-    display: inline-block;
-    padding: 5px 0;
-}
-
-.footer-links a:hover {
-    color: var(--gov-orange);
-    padding-left: 5px;
-}
-
-.social-node {
-    width: 45px;
-    height: 45px;
-    background: rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    transition: 0.3s;
-    cursor: pointer;
-}
-
-.social-node:hover {
-    background: var(--gov-orange);
-    color: white;
-    transform: translateY(-3px);
-}
-
-/* --- 8. RESPONSIVE --- */
-@media (max-width: 768px) {
-    .hero-section {
-        padding: 40px 0;
-    }
-
-    .floating-stat {
-        position: static;
-        margin-top: 20px;
-    }
-
-    .display-5 {
-        font-size: 2.2rem;
-    }
-
-    .btn-lg {
-        width: 100%;
-    }
-}
-
-/* --- ABOUT PAGE GLOBAL --- */
-.about-wrapper {
-    overflow-x: hidden;
-    background-color: #ffffff;
-}
-
-/* --- 1. HERO SECTION --- */
-.about-hero {
-    background: linear-gradient(135deg, #003366 0%, #00509d 100%);
+/* --- 5. PREMIUM SERVICE CARDS & SATHIMARKET --- */
+.service-card-premium {
+    background: var(--white);
+    border: 1px solid #f1f5f9 !important;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    transition: var(--transition-smooth);
     position: relative;
-    padding-bottom: 120px !important;
-    /* Space for wave */
-}
-
-.about-hero h1 {
-    letter-spacing: -1px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.hero-wave {
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    line-height: 0;
-}
-
-/* --- 2. IMPACT STATS --- */
-.mt-n5 {
-    margin-top: -80px !important;
-}
-
-.z-index-2 {
-    z-index: 2;
-}
-
-.stat-card {
-    transition: all 0.3s ease;
-    border-bottom: 4px solid transparent;
-}
-
-.stat-card:hover {
-    transform: translateY(-10px);
-    border-bottom-color: var(--gov-green);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
-}
-
-.stat-icon svg {
-    width: 32px;
-    height: 32px;
-}
-
-/* --- 3. CONTENT SECTION --- */
-.animate-left {
-    animation: fadeInLeft 1s ease-out;
-}
-
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.floating-img {
-    animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-    0% {
-        transform: translateY(0px);
-    }
-
-    50% {
-        transform: translateY(-20px);
-    }
-
-    100% {
-        transform: translateY(0px);
-    }
-}
-
-/* --- 4. VISION & MISSION CARDS --- */
-.mission-bg-icon {
-    position: absolute;
-    right: -20px;
-    bottom: -20px;
-    opacity: 0.1;
-    transform: rotate(-15deg);
-    pointer-events: none;
-}
-
-.card .z-index-1 {
-    position: relative;
+    overflow: hidden;
     z-index: 1;
 }
 
-/* --- 5. CORE VALUES --- */
-.shadow-inner {
-    box-shadow: inset 0 2px 15px rgba(0, 0, 0, 0.05);
-}
-
-.value-box {
-    transition: all 0.3s ease;
-    border: 1px solid #f1f5f9;
-}
-
-.value-box:hover {
-    background-color: #f8fafc !important;
-    border-color: var(--gov-navy);
-}
-
-.value-box svg {
-    transition: transform 0.3s ease;
-}
-
-.value-box:hover svg {
-    transform: scale(1.1) rotate(5deg);
-}
-
-/* --- RESPONSIVE ADJUSTMENTS --- */
-@media (max-width: 768px) {
-    .about-hero {
-        padding-top: 50px !important;
-        padding-bottom: 80px !important;
-    }
-
-    .display-3 {
-        font-size: 2.5rem;
-    }
-
-    .mt-n5 {
-        margin-top: -50px !important;
-    }
-
-    .stat-card h2 {
-        font-size: 1.5rem;
-    }
-}
-/* Stats Section Styling */
-.stats-section {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* CTA Gradient Card */
-.cta-gradient-card {
-  background: linear-gradient(135deg, #8779cd 0%, #9896d6 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.cta-pattern {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  opacity: 0.1;
-  background-image: radial-gradient(#ffffff 0.5px, transparent 0.5px);
-  background-size: 20px 20px;
-  z-index: 1;
-}
-
-/* Input Group Hover Effects */
-.cta-gradient-card .btn-warning {
-  background-color: #facc15;
-  border-color: #facc15;
-  color: #166534;
-}
-
-.cta-gradient-card .btn-warning:hover {
-  background-color: #fef08a;
-  transform: translateX(3px);
-}
-
-.transition-hover {
-  transition: all 0.3s ease;
-}
-
-.rounded-5 {
-  border-radius: 2rem !important;
-}
-
-/* Text spacing */
-.tracking-widest {
-  letter-spacing: 0.1em;
-}
-/* --- CONTACT PAGE STYLES --- */
-
-.contact-page {
-    background-color: #ffffff;
-}
-
-/* 1. Contact Info Card (Left Side) */
-.contact-info-card {
-    background: linear-gradient(135deg, #003366 0%, #003366 100%);
-    border: none;
-    transition: transform 0.3s ease;
-}
-
-.icon-box-white {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    color: white;
-}
-
-.social-link {
-    width: 45px;
-    height: 45px;
-    background: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.social-link:hover {
-    background: #ffffff;
-    color: var(--gov-navy) !important;
-    transform: translateY(-5px);
-}
-
-/* 2. Contact Form Card (Right Side) */
-.contact-form-card {
-    background-color: #cbd5e1;
-    border: 1px solid #f1f5f9 !important;
-}
-
-.form-control-lg,
-.form-select-lg {
-    font-size: 1rem;
-    padding: 0.8rem 1.2rem;
-    transition: all 0.2s ease-in-out;
-}
-
-.form-control:focus,
-.form-select:focus {
-    background-color: #ffffff !important;
-    border: 1px solid var(--gov-navy) !important;
-    box-shadow: 0 0 0 0.25rem rgba(0, 51, 102, 0.1);
-    outline: none;
-}
-
-/* 3. Button Interaction */
-.transition-all {
-    transition: all 0.3s ease;
-}
-
-.btn-success:hover:not(:disabled) {
-    background-color: var(--gov-navy) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0, 51, 102, 0.3) !important;
-}
-
-/* 4. Alerts */
-.alert {
-    border-radius: 12px;
-    font-weight: 500;
-}
-
-/* 5. Responsive Tweaks */
-@media (max-width: 991px) {
-    .contact-info-card {
-        margin-bottom: 2rem;
-    }
-}
-
-@media (max-width: 576px) {
-    .display-4 {
-        font-size: 2.5rem;
-    }
-
-    .contact-form-card {
-        padding: 1.5rem !important;
-    }
-}
-
-/* --- SERVICES PAGE STYLES --- */
-
-.services-page {
-    background-color: #fcfdfe;
-    /* Faint blue-tinted white for freshness */
-}
-
-/* 1. Header & Underline */
-.ls-2 {
-    letter-spacing: 2px;
-}
-
-.underline {
-    width: 80px;
+/* Top accent line inside card instead of outside border */
+.service-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, var(--gov-green), var(--gov-orange));
-    border-radius: 2px;
-}
-
-/* 2. Premium Service Cards */
-.service-card-premium {
-    background: #ffffff;
-    border: 1px solid #f1f5f9 !important;
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    position: relative;
-    overflow: hidden;
+    background: var(--gov-navy);
+    transition: var(--transition-smooth);
+    opacity: 0.5;
 }
 
 .service-card-premium:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 51, 102, 0.08) !important;
-    border-color: rgba(25, 135, 84, 0.2) !important;
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-hover) !important;
+    border-color: transparent !important;
 }
 
-/* 3. Icon Circles with Soft Backgrounds */
+.service-card-premium:hover::before {
+    height: 6px;
+    opacity: 1;
+    background: var(--gov-orange);
+}
+
 .icon-circle {
-    width: 70px;
-    height: 70px;
+    width: 72px;
+    height: 72px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 20px;
-    transition: transform 0.3s ease;
+    border-radius: 20px; /* Squircle shape */
+    margin-bottom: 24px;
+    transition: var(--transition-smooth);
+    background: var(--bg-light);
 }
 
 .service-card-premium:hover .icon-circle {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: var(--shadow-md);
 }
 
-/* Background Variations */
-.bg-warning-light {
-    background-color: #fff9db;
+/* --- 6. ABOUT & HIGHLIGHT SECTIONS --- */
+.floating-stat {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 18px 30px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-left: 6px solid var(--gov-green);
+    box-shadow: var(--shadow-lg);
+    bottom: -20px;
+    right: -20px;
+    position: absolute;
 }
 
-.bg-primary-light {
-    background-color: #e7f5ff;
+/* --- 7. CONTACT & FORMS --- */
+.contact-form-card {
+    background-color: var(--white);
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    box-shadow: var(--shadow-md);
 }
 
-.bg-success-light {
-    background-color: #ebfbee;
+.form-control {
+    border-radius: var(--radius-sm);
+    padding: 14px 20px;
+    border: 1px solid #cbd5e1;
+    background-color: #f8fafc;
+    transition: var(--transition-fast);
 }
 
-.bg-danger-light {
-    background-color: #fff5f5;
+.form-control:focus {
+    border-color: var(--gov-blue);
+    background-color: var(--white);
+    box-shadow: 0 0 0 4px rgba(0, 80, 157, 0.1);
+    outline: none;
 }
 
-.bg-info-light {
-    background-color: #e3fafc;
+/* --- 8. CALL TO ACTION (CTA) --- */
+.cta-gradient-card {
+    background: linear-gradient(135deg, var(--gov-navy) 0%, #001f3f 100%);
+    border-radius: 32px;
+    position: relative;
+    overflow: hidden;
+    color: white;
+    box-shadow: var(--shadow-hover);
 }
 
-.bg-secondary-light {
-    background-color: #f1f3f5;
+.cta-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(255,153,51,0.2) 0%, transparent 50%);
+    z-index: 0;
 }
 
-/* 4. Interactive Links (Hover Arrow) */
-.hover-arrow {
-    font-size: 0.95rem;
-    transition: color 0.2s;
-}
-
-.transition-icon {
-    transition: transform 0.3s ease;
-}
-
-.service-card-premium:hover .transition-icon {
-    transform: translateX(8px);
-}
-
-/* 5. CTA Banner */
-.cta-banner {
-    background: linear-gradient(135deg, #003366 0%, #003366 100%);
+.cta-gradient-card .btn-warning {
+    background: linear-gradient(135deg, var(--market-gold), #f59e0b);
     border: none;
+    color: var(--text-dark);
+    font-weight: 800;
+    box-shadow: var(--glow-orange);
+    transition: var(--transition-smooth);
 }
 
-.cta-banner h3 {
-    letter-spacing: -0.5px;
+.cta-gradient-card .btn-warning:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
 }
 
-/* 6. Responsive Fixes */
-@media (max-width: 768px) {
-    .display-5 {
-        font-size: 2rem;
-    }
+/* --- 9. BLOG & PATRIKA --- */
+.blog-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-smooth);
+    background: var(--white);
+}
 
-    .service-card-premium {
-        padding: 1.5rem !important;
-    }
+.blog-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+}
+
+.blog-card img {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.blog-card:hover img {
+    transform: scale(1.08);
+}
+
+.blog-card .badge {
+    backdrop-filter: blur(8px);
+    background: rgba(25, 135, 84, 0.9) !important; /* Premium semi-transparent badge */
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* --- 10. FOOTER --- */
+.footer-gov {
+    background-color: #020617; /* Deep slate for modern footer */
+    color: #cbd5e1;
+    border-top: 4px solid var(--gov-orange);
+    padding: 80px 0 30px;
+}
+
+.footer-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+}
+
+.footer-links a::before {
+    content: '→';
+    margin-right: 8px;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: var(--transition-fast);
+    color: var(--gov-orange);
+}
+
+.footer-links a:hover {
+    color: var(--white);
+    padding-left: 5px;
+}
+
+.footer-links a:hover::before {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* --- 11. RESPONSIVE UTILITIES --- */
+@media (max-width: 992px) {
+    .display-4 { font-size: 2.5rem; line-height: 1.2; }
+    .hero-section { text-align: center; padding: 60px 0; }
+    .floating-stat { position: relative; bottom: 0; right: 0; margin-top: -30px; display: inline-block; }
+}
+
+@media (max-width: 576px) {
+    .btn-gov-primary, .btn-gov-outline { width: 100%; margin-bottom: 12px; justify-content: center; }
+    .cta-gradient-card { padding: 40px 20px !important; border-radius: 24px; }
+    .display-6 { font-size: 2rem; }
 }

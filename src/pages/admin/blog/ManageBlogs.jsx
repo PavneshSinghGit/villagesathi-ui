@@ -2,8 +2,8 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { blogApi } from "../../../api/blogApi";
 import { 
   Edit, Trash2, Plus, Calendar, User, Eye, Search,  
-  ChevronLeft, ChevronRight, X, FileText, CheckCircle, Clock 
-} from "lucide-react"; // Added missing icons
+  ChevronLeft, ChevronRight, X, FileText, CheckCircle, Clock, LayoutGrid, Loader2, Image as ImageIcon
+} from "lucide-react";
 import BlogForm from "./BlogForm";
 
 const ManageBlogs = () => {
@@ -17,7 +17,6 @@ const ManageBlogs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
-  // --- Stats Calculation ---
   const stats = useMemo(() => {
     return {
       total: blogs.length,
@@ -26,7 +25,6 @@ const ManageBlogs = () => {
     };
   }, [blogs]);
 
-  // --- Show/Hide Functions ---
   const handleShowModal = (blog = null) => {
     setSelectedBlog(blog);
     setShowModal(true);
@@ -37,7 +35,6 @@ const ManageBlogs = () => {
     setSelectedBlog(null);
   };
 
-  // --- Fetch Data ---
   const fetchBlogs = useCallback(async () => {
     try {
       setLoading(true);
@@ -54,7 +51,6 @@ const ManageBlogs = () => {
     fetchBlogs();
   }, [fetchBlogs]);
 
-  // --- Filter Logic ---
   const filteredBlogs = useMemo(() => {
     return blogs.filter((blog) =>
       (blog.title?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
@@ -62,14 +58,13 @@ const ManageBlogs = () => {
     );
   }, [blogs, searchTerm]);
 
-  // --- Pagination Logic ---
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredBlogs.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage);
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bhai, pakka delete karna hai?")) {
+    if (window.confirm("Bhai, pakka delete karna hai? This cannot be undone.")) {
       try {
         await blogApi.deleteBlog(id);
         fetchBlogs();
@@ -79,163 +74,199 @@ const ManageBlogs = () => {
     }
   };
 
-  // --- Table Row Skeleton ---
-  const TableSkeleton = () => (
-    <>
-      {[1, 2, 3, 4, 5].map((idx) => (
-        <tr key={idx} className="placeholder-glow">
-          <td className="ps-4">
-            <div className="placeholder rounded-3" style={{ width: '80px', height: '55px', display: 'block' }}></div>
-          </td>
-          <td>
-            <div className="placeholder col-8 mb-1"></div>
-            <div className="placeholder col-4 small"></div>
-          </td>
-          <td><div className="placeholder col-6"></div></td>
-          <td><div className="placeholder col-7"></div></td>
-          <td className="text-center"><div className="placeholder col-4"></div></td>
-          <td className="text-end pe-4"><div className="placeholder col-6"></div></td>
-        </tr>
-      ))}
-    </>
-  );
-
   return (
-    <div className="container-fluid py-4 px-4 bg-light min-vh-100">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="fw-bold text-dark mb-0">Blog Management</h3>
-        <button className="btn btn-dark px-4 py-2 rounded-3 d-flex align-items-center gap-2" onClick={() => handleShowModal()}>
-          <Plus size={20} /> Add Post
-        </button>
+    <div className="container-fluid py-4 px-md-5" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+      <style>{`
+        .blog-hero {
+          background: #0f172a;
+          border-radius: 20px;
+          padding: 25px 30px;
+          border-bottom: 4px solid #ea580c;
+          margin-bottom: 30px;
+        }
+        .stat-card-blog {
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          transition: 0.3s;
+        }
+        .search-panel-blog {
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 10px 15px;
+          display: flex;
+          align-items: center;
+          transition: 0.3s;
+        }
+        .search-panel-blog:focus-within {
+          border-color: #ea580c;
+          box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.05);
+        }
+        .search-panel-blog input {
+          border: none;
+          outline: none;
+          width: 100%;
+          padding-left: 10px;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+        .table-premium-blog thead th {
+          background: #f8fafc;
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: #64748b;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          padding: 15px;
+          border: none;
+        }
+        .blog-cover-mini {
+          width: 70px;
+          height: 45px;
+          border-radius: 8px;
+          object-fit: cover;
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+        }
+        .btn-add-blog {
+          background: #ea580c;
+          color: white;
+          border: none;
+          font-weight: 700;
+          border-radius: 10px;
+          padding: 10px 20px;
+          transition: 0.3s;
+        }
+        .btn-add-blog:hover { background: #f59e0b; transform: translateY(-2px); }
+        .text-xxs { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.5px; }
+      `}</style>
+
+      {/* Header Section */}
+      <div className="blog-hero shadow-lg">
+        <div className="row align-items-center g-3">
+          <div className="col-md-8">
+            <div className="d-flex align-items-center gap-3">
+              <div className="p-3 rounded-4" style={{background: 'rgba(234, 88, 12, 0.1)'}}>
+                <LayoutGrid size={28} style={{color: '#ea580c'}} />
+              </div>
+              <div>
+                <h3 className="text-white fw-bold mb-0">Blog Engine</h3>
+                <p className="text-white-50 small mb-0 fw-bold">Manage system-wide articles and announcements</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4 text-md-end">
+            <button className="btn-add-blog shadow-sm d-inline-flex align-items-center gap-2" onClick={() => handleShowModal()}>
+              <Plus size={18} /> CREATE POST
+            </button>
+          </div>
+        </div>
       </div>
 
+      {/* Quick Stats */}
       <div className="row g-3 mb-4">
         <div className="col-md-4">
-          <div className="card border-0 shadow-sm p-3 rounded-4 bg-white border-start border-primary border-4">
-            <div className="d-flex align-items-center gap-3">
-              <div className="p-2 bg-primary-subtle rounded text-primary"><FileText size={20}/></div>
-              <div><h5 className="fw-bold mb-0">{stats.total}</h5><small className="text-muted">Total Posts</small></div>
-            </div>
+          <div className="stat-card-blog p-3 shadow-sm d-flex align-items-center gap-3">
+            <div className="p-2 rounded-3" style={{background: '#eff6ff', color: '#2563eb'}}><FileText size={20}/></div>
+            <div><div className="text-xxs text-muted uppercase">Total Articles</div><h5 className="fw-bold mb-0 text-dark">{stats.total}</h5></div>
           </div>
         </div>
         <div className="col-md-4">
-          <div className="card border-0 shadow-sm p-3 rounded-4 bg-white border-start border-success border-4">
-            <div className="d-flex align-items-center gap-3">
-              <div className="p-2 bg-success-subtle rounded text-success"><CheckCircle size={20}/></div>
-              <div><h5 className="fw-bold mb-0">{stats.active}</h5><small className="text-muted">Live</small></div>
-            </div>
+          <div className="stat-card-blog p-3 shadow-sm d-flex align-items-center gap-3">
+            <div className="p-2 rounded-3" style={{background: '#f0fdf4', color: '#16a34a'}}><CheckCircle size={20}/></div>
+            <div><div className="text-xxs text-muted uppercase">Published</div><h5 className="fw-bold mb-0 text-dark">{stats.active}</h5></div>
           </div>
         </div>
         <div className="col-md-4">
-          <div className="card border-0 shadow-sm p-3 rounded-4 bg-white border-start border-warning border-4">
-            <div className="d-flex align-items-center gap-3">
-              <div className="p-2 bg-warning-subtle rounded text-warning"><Clock size={20}/></div>
-              <div><h5 className="fw-bold mb-0">{stats.draft}</h5><small className="text-muted">Drafts</small></div>
-            </div>
+          <div className="stat-card-blog p-3 shadow-sm d-flex align-items-center gap-3">
+            <div className="p-2 rounded-3" style={{background: '#fff7ed', color: '#ea580c'}}><Clock size={20}/></div>
+            <div><div className="text-xxs text-muted uppercase">In Draft</div><h5 className="fw-bold mb-0 text-dark">{stats.draft}</h5></div>
           </div>
         </div>
       </div>
 
-      <div className="mb-4">
-        <div className="position-relative">
-          <Search className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" size={22} />
-          <input 
-            type="text" 
-            className="form-control form-control-lg ps-5 border-0 shadow-sm py-3" 
-            placeholder="Search by title or category..." 
-            style={{ borderRadius: '12px' }}
-            value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} 
-          />
-          {searchTerm && (
-            <button className="position-absolute top-50 end-0 translate-middle-y me-3 btn btn-link p-0 text-muted" onClick={() => setSearchTerm("")}>
-              <X size={20} />
-            </button>
-          )}
-        </div>
+      {/* Search Bar */}
+      <div className="search-panel-blog shadow-sm mb-4 border">
+        <Search size={18} className="text-muted" />
+        <input 
+          type="text" 
+          placeholder="Filter by title, author, or category..." 
+          value={searchTerm}
+          onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} 
+        />
+        {searchTerm && <X size={18} className="text-muted cursor-pointer" onClick={() => setSearchTerm("")} />}
       </div>
 
-      <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+      {/* Data Table */}
+      <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="bg-light">
-              <tr className="text-muted small text-uppercase">
-                <th className="ps-4" style={{ width: '100px' }}>Cover</th>
-                <th>Blog Info</th>
-                <th>Category</th>
-                <th>Author & Date</th>
-                <th className="text-center">Status</th>
-                <th className="text-end pe-4">Actions</th>
+          <table className="table table-premium-blog align-middle m-0">
+            <thead>
+              <tr>
+                <th className="ps-4">COVER</th>
+                <th>BLOG CONTENT</th>
+                <th>CATEGORY</th>
+                <th>METADATA</th>
+                <th className="text-center">VISIBILITY</th>
+                <th className="text-end pe-4">MANAGEMENT</th>
               </tr>
             </thead>
-            <tbody className="border-top-0">
+            <tbody>
               {loading ? (
-                <TableSkeleton />
+                <tr><td colSpan="6" className="text-center py-5"><Loader2 className="animate-spin text-orange mx-auto" /></td></tr>
               ) : currentItems.length > 0 ? (
                 currentItems.map((blog) => (
-                  <tr key={blog.blogId || blog.id}>
+                  <tr key={blog.blogId || blog.id} className="border-bottom">
                     <td className="ps-4">
-                      <div className="rounded-3 shadow-sm border bg-light overflow-hidden d-flex align-items-center justify-content-center" style={{ width: '80px', height: '55px' }}>
-                        <img
-                          src={`${IMAGE_BASE_URL}${blog.imageUrl}`}
-                          alt=""
-                          loading="lazy"
-                          className="w-100 h-100 object-fit-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.parentElement.innerHTML = `<div class="text-muted"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>`;
-                          }}
-                        />
+                      <img
+                        src={`${IMAGE_BASE_URL}${blog.imageUrl}`}
+                        alt=""
+                        className="blog-cover-mini"
+                        onError={(e) => {
+                          e.target.src = "https://placehold.co/70x45/f1f5f9/64748b?text=No+Img";
+                        }}
+                      />
+                    </td>
+                    <td>
+                      <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '280px' }}>{blog.title}</div>
+                      <div className="text-xxs text-muted d-flex align-items-center gap-1 mt-1">
+                        <Eye size={10} style={{color: '#ea580c'}}/> {blog.views || 0} Total Impressions
                       </div>
                     </td>
+                    <td><span className="badge bg-slate-100 text-dark border p-2" style={{fontSize: '0.65rem', background: '#f1f5f9'}}>{blog.category?.toUpperCase()}</span></td>
                     <td>
-                      <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '250px' }}>{blog.title}</div>
-                      <div className="small text-muted d-flex align-items-center gap-1"><Eye size={12}/> {blog.views || 0}</div>
-                    </td>
-                    <td><span className="badge rounded-pill bg-info-subtle text-info border border-info-subtle">{blog.category}</span></td>
-                    <td>
-                      <div className="small text-dark fw-medium text-truncate" style={{maxWidth: '120px'}}><User size={12}/> {blog.authorName || 'Admin'}</div>
-                      <div className="small text-muted mt-1"><Calendar size={12}/> {blog.createdDate ? new Date(blog.createdDate).toLocaleDateString('en-GB') : 'N/A'}</div>
+                      <div className="text-xxs text-dark fw-bold uppercase d-flex align-items-center gap-1"><User size={10}/> {blog.authorName || 'Staff Admin'}</div>
+                      <div className="text-xxs text-muted d-flex align-items-center gap-1 mt-1"><Calendar size={10}/> {blog.createdDate ? new Date(blog.createdDate).toLocaleDateString('en-IN') : 'N/A'}</div>
                     </td>
                     <td className="text-center">
-                      <span className={`badge border px-2 py-1 small ${blog.isActive ? 'bg-success-subtle text-success border-success' : 'bg-secondary-subtle text-secondary border-secondary'}`}>
-                        {blog.isActive ? 'Live' : 'Draft'}
+                      <span className={`badge px-3 py-1 rounded-pill ${blog.isActive ? 'bg-success-subtle text-success' : 'bg-slate-200 text-muted'}`} style={{fontSize: '0.65rem'}}>
+                        {blog.isActive ? 'LIVE' : 'DRAFT'}
                       </span>
                     </td>
                     <td className="text-end pe-4">
                       <div className="d-flex justify-content-end gap-2">
-                        <button className="btn btn-outline-primary btn-sm rounded-circle p-2 border-0 bg-light" onClick={() => handleShowModal(blog)}><Edit size={18} /></button>
-                        <button className="btn btn-outline-danger btn-sm rounded-circle p-2 border-0 bg-light" onClick={() => handleDelete(blog.blogId)}><Trash2 size={18} /></button>
+                        <button className="btn btn-sm btn-light border" onClick={() => handleShowModal(blog)}><Edit size={16} className="text-primary"/></button>
+                        <button className="btn btn-sm btn-light border" onClick={() => handleDelete(blog.blogId)}><Trash2 size={16} className="text-danger"/></button>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="6" className="text-center py-5 text-muted">Bhai, koi blog nahi mila!</td></tr>
+                <tr><td colSpan="6" className="text-center py-5 text-muted fw-bold">NO ARTICLES FOUND MATCHING YOUR CRITERIA</td></tr>
               )}
             </tbody>
           </table>
         </div>
 
+        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="card-footer bg-white border-0 py-3 border-top">
-            <div className="d-flex justify-content-between align-items-center">
-              <small className="text-muted fw-medium">Showing {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredBlogs.length)} of {filteredBlogs.length}</small>
-              <nav>
-                <ul className="pagination pagination-sm mb-0 gap-1">
-                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                    <button className="page-link border-0 rounded-2 shadow-sm" onClick={() => setCurrentPage(currentPage - 1)}><ChevronLeft size={16}/></button>
-                  </li>
-                  {[...Array(totalPages)].map((_, i) => (
-                    <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                      <button className="page-link border-0 rounded-2 shadow-sm mx-1 px-3" onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
-                    </li>
-                  ))}
-                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                    <button className="page-link border-0 rounded-2 shadow-sm" onClick={() => setCurrentPage(currentPage + 1)}><ChevronRight size={16}/></button>
-                  </li>
-                </ul>
-              </nav>
+          <div className="p-3 bg-light border-top d-flex justify-content-between align-items-center px-4">
+            <small className="text-xxs text-muted uppercase">Displaying {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredBlogs.length)} of {filteredBlogs.length} posts</small>
+            <div className="pagination pagination-sm mb-0 gap-1">
+              <button className="btn btn-sm btn-white border shadow-sm" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}><ChevronLeft size={14}/></button>
+              <span className="btn btn-sm btn-dark px-3 fw-bold" style={{background: '#0f172a'}}>{currentPage}</span>
+              <button className="btn btn-sm btn-white border shadow-sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}><ChevronRight size={14}/></button>
             </div>
           </div>
         )}

@@ -1,16 +1,35 @@
-import axios from "axios";
+import axiosInstance from './axiosInstance';
 
-// Ab ye URL aapki .env file se "https://api.villagesathi.in/api" uthayega
-const BASE_URL = import.meta.env.VITE_API_URL;
+/**
+ * Unified Login API
+ * Isse Admin, Shopkeeper, aur Customer teeno login honge.
+ */
+export const loginUser = (credentials) => 
+    axiosInstance.post('/Auth/Login', credentials); 
 
-export const loginUser = async (data) => {
-  try {
-    const response = await axios.post(`${BASE_URL}/Auth/login`, data);
-    return response.data;
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || "Server error",
-    };
-  }
-};
+/**
+ * Unified Register API (For Merchant/Shopkeepers)
+ */
+export const registerUser = (formData) => 
+    axiosInstance.post('/Auth/Register', formData);
+
+/**
+ * Customer Specific Registration
+ * Ye aapke 'usp_RegisterCustomer' procedure ko call karega
+ */
+export const registerCustomer = (formData) => 
+    axiosInstance.post('/Customer/Register', formData);  
+
+/**
+ * Customer Address Management (Add, Edit, Delete, Get)
+ * Ye 'usp_ManageCustomerAddress' procedure ko call karega
+ * ActionType: 1-Add, 2-Update, 3-Get, 4-Delete
+ */
+export const manageCustomerAddress = (addressData) => 
+    axiosInstance.post('/Customer/ManageAddress', addressData);
+
+/**
+ * Get Customer Profile (Optional: Agar alag se profile data chahiye)
+ */
+export const getCustomerProfile = (userId) => 
+    axiosInstance.get(`/Customer/GetProfile/${userId}`);
