@@ -6,30 +6,23 @@ import { useCart } from '../../../context/CartContext';
 import { toast } from 'react-toastify';
 import {
     ShoppingBag, Trash2, ShieldCheck, ArrowLeft,
-    Minus, Plus, MapPin, CheckCircle2, Package
+    Minus, Plus, MapPin, CheckCircle2, Package, Tag
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
 
-/** Normalise an item's ID regardless of casing from the API */
 const getItemId = (item) => item?.itemID ?? item?.ItemID;
+const getShopId  = (item) => item?.shopID ?? item?.ShopID ?? item?.shopId ?? item?.ShopId ?? item?.shop_id ?? null;
 
-/** Normalise an item's shop ID regardless of casing */
-const getShopId = (item) => item?.shopID ?? item?.ShopID;
-
-/** Resolve a product image URL from its mediaList array */
 const resolveMediaUrl = (mediaList, baseUrl) => {
     const FALLBACK = 'https://placehold.co/200?text=No+Image';
     if (!mediaList || mediaList.length === 0) return FALLBACK;
-
     const primary = mediaList.find(m => m.isPrimary || m.IsPrimary) ?? mediaList[0];
     let path = primary.mediaURL ?? primary.MediaURL;
     if (!path) return FALLBACK;
     if (path.startsWith('http')) return path;
-
-    // Strip leading backslashes / wwwroot prefix added by some .NET setups
     path = path.replace(/\\/g, '/').replace(/^\/?wwwroot/i, '');
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     const cleanBase = baseUrl?.endsWith('/') ? baseUrl.slice(0, -1) : (baseUrl ?? '');
@@ -41,14 +34,14 @@ const resolveMediaUrl = (mediaList, baseUrl) => {
 // ─────────────────────────────────────────────
 
 const CartSkeleton = () => (
-    <div className="vstack gap-3">
-        {[1, 2].map(n => (
-            <div key={n} className="cart-item-card d-flex gap-3 bg-white rounded shadow-sm p-3">
-                <div className="skeleton" style={{ width: 90, height: 90, borderRadius: 6 }} />
-                <div className="flex-grow-1 vstack gap-2">
-                    <div className="skeleton" style={{ height: 14, width: '70%', borderRadius: 4 }} />
-                    <div className="skeleton" style={{ height: 18, width: '30%', borderRadius: 4 }} />
-                    <div className="skeleton" style={{ height: 28, width: 100, borderRadius: 4 }} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[1, 2, 3].map(n => (
+            <div key={n} className="c-skeleton-card">
+                <div className="c-skeleton-thumb" />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div className="c-skeleton" style={{ height: 13, width: '65%' }} />
+                    <div className="c-skeleton" style={{ height: 16, width: '30%' }} />
+                    <div className="c-skeleton" style={{ height: 28, width: 90 }} />
                 </div>
             </div>
         ))}
@@ -61,15 +54,70 @@ const AddressCard = ({ addr, isSelected, onSelect }) => (
         role="button"
         tabIndex={0}
         onKeyDown={e => e.key === 'Enter' && onSelect(addr)}
-        className={`p-3 mb-2 rounded address-option ${isSelected ? 'selected' : ''}`}
+        className={`c-addr-option${isSelected ? ' c-addr-selected' : ''}`}
     >
-        <div className="d-flex justify-content-between align-items-center">
-            <div>
-                <div className="fw-bold small text-dark">{addr.FullAddress}</div>
-                <div className="text-muted" style={{ fontSize: '11px' }}>{addr.City}, {addr.Pincode}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <div style={{ minWidth: 0 }}>
+                <div className="c-addr-full">{addr.FullAddress}</div>
+                <div className="c-addr-sub">{addr.City}, {addr.Pincode}</div>
             </div>
-            {isSelected && <CheckCircle2 size={18} className="text-maroon" />}
+            {isSelected && <CheckCircle2 size={17} style={{ color: 'var(--maroon)', flexShrink: 0 }} />}
         </div>
+    </div>
+);
+
+// ─────────────────────────────────────────────
+// Order Summary Panel (reused in desktop + mobile)
+// ─────────────────────────────────────────────
+
+const OrderSummary = ({ total, savings, cartItems, isPlacingOrder, onCheckout, compact }) => (
+    <div className={compact ? 'c-summary-compact' : 'c-summary-panel'}>
+        {!compact && (
+            <div className="c-summary-title">Order Summary</div>
+        )}
+
+        <div className="c-summary-row">
+            <span className="c-summary-label">MRP Total</span>
+            <span className="c-summary-strike">₹{total + savings}</span>
+        </div>
+        <div className="c-summary-row c-summary-green">
+            <span>Discount (20%)</span>
+            <span>− ₹{savings}</span>
+        </div>
+        <div className="c-summary-row c-summary-green">
+            <span>Delivery</span>
+            <span style={{ fontWeight: 700 }}>FREE</span>
+        </div>
+        <div className="c-summary-total-row">
+            <span>Total Payable</span>
+            <span className="c-total-amt">₹{total}</span>
+        </div>
+
+        {savings > 0 && !compact && (
+            <div className="c-savings-pill">
+                <Tag size={12} /> You save ₹{savings} on this order!
+            </div>
+        )}
+
+        <button
+            className="c-place-btn"
+            onClick={onCheckout}
+            disabled={isPlacingOrder || cartItems.length === 0}
+        >
+            {isPlacingOrder ? (
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <span className="c-spinner" /> Processing...
+                </span>
+            ) : (
+                compact ? `Place Order  ₹${total}` : 'Place My Order'
+            )}
+        </button>
+
+        {!compact && (
+            <p className="c-secure-note">
+                <ShieldCheck size={13} style={{ color: '#16a34a' }} /> Secure Checkout
+            </p>
+        )}
     </div>
 );
 
@@ -82,13 +130,13 @@ const Cart = () => {
     const navigate = useNavigate();
     const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_URL;
 
-    const [addresses, setAddresses] = useState([]);
-    const [selectedAddress, setSelectedAddress] = useState(null);
-    const [showAddressModal, setShowAddressModal] = useState(false);
-    const [loadingAddresses, setLoadingAddresses] = useState(true);
-    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+    const [addresses,       setAddresses]       = useState([]);
+    const [selectedAddress, setSelectedAddress]  = useState(null);
+    const [showAddressModal,setShowAddressModal] = useState(false);
+    const [loadingAddresses,setLoadingAddresses] = useState(true);
+    const [isPlacingOrder,  setIsPlacingOrder]   = useState(false);
 
-    // ── Fetch saved addresses ──────────────────
+    // ── Fetch addresses ──────────────────────
     const fetchUserAddresses = useCallback(async () => {
         try {
             setLoadingAddresses(true);
@@ -97,9 +145,7 @@ const Cart = () => {
             if (!userId) return;
 
             const res = await axiosInstance.post('/Customer/ManageAddress', {
-                actionType: 3,
-                userId,
-                addressId: 0,
+                actionType: 3, userId, addressId: 0,
                 fullAddress: '', landmark: '', city: '', state: '', pincode: ''
             });
 
@@ -117,7 +163,7 @@ const Cart = () => {
 
     useEffect(() => { fetchUserAddresses(); }, [fetchUserAddresses]);
 
-    // ── Place order ───────────────────────────
+    // ── Checkout ─────────────────────────────
     const handleCheckout = async () => {
         if (cartItems.length === 0) return;
 
@@ -127,33 +173,21 @@ const Cart = () => {
             return;
         }
 
-        // Resolve shopId — check every known casing your API might return
-        const resolveShopId = (item) =>
-            item?.shopID ?? item?.ShopID ?? item?.shopId ?? item?.ShopId ?? item?.shop_id ?? null;
-
-        const rawShopIds = cartItems.map(resolveShopId);
-
-        // Dev-only: uncomment this line temporarily to inspect what your cart items contain
-        // console.table(cartItems.map(i => ({ name: i.itemName ?? i.ItemName, shopID: i.shopID, ShopID: i.ShopID, shopId: i.shopId })));
-
-        // Filter out nulls before deduping — a missing shopId field shouldn't block checkout
+        const rawShopIds    = cartItems.map(getShopId);
         const definedShopIds = [...new Set(rawShopIds.filter(id => id != null))];
 
-        // Only block if there are genuinely 2+ *different* shop IDs present
         if (definedShopIds.length > 1) {
-            toast.error('Your cart contains items from multiple shops. Please order from one shop at a time.');
+            toast.error('Your cart has items from multiple shops. Please order from one shop at a time.');
             return;
         }
 
-        // Use the resolved shopId, falling back to 0 if the field simply doesn't exist in cart items
         const resolvedShopId = definedShopIds[0] ?? 0;
-
         setIsPlacingOrder(true);
+
         try {
             const userData = JSON.parse(localStorage.getItem('customerUser') || '{}');
-            const userId = userData.userId ?? userData.UserId;
+            const userId   = userData.userId ?? userData.UserId;
 
-            // FIX: include orderItems so the backend knows what was ordered
             const orderPayload = {
                 userId,
                 shopId: resolvedShopId,
@@ -162,15 +196,14 @@ const Cart = () => {
                 orderStatus: 0,
                 isActive: true,
                 orderItems: cartItems.map(item => ({
-                    itemId: getItemId(item),
-                    quantity: item.quantity,
-                    unitPrice: item.price,
+                    itemId:     getItemId(item),
+                    quantity:   item.quantity,
+                    unitPrice:  item.price,
                     totalPrice: item.price * item.quantity
                 }))
             };
 
             const res = await axiosInstance.post('/Orders/PlaceOrder', orderPayload);
-
             const success =
                 res.data?.orderID ||
                 res.data?.OrderID ||
@@ -192,386 +225,568 @@ const Cart = () => {
     };
 
     // ─────────────────────────────────────────
-    // Render
-    // ─────────────────────────────────────────
-
-    const total = getCartTotal();
+    const total   = getCartTotal();
     const savings = cartItems.reduce((acc, item) => acc + Math.round(item.price * 0.2 * item.quantity), 0);
 
     return (
-        <main className="min-vh-100 pb-5" style={{ backgroundColor: '#f8f0f6' }}>
+        <main style={{ minHeight: '100vh', background: '#f8f0f6', paddingBottom: 80 }}>
             <Helmet>
                 <title>My Cart | SathiMarket</title>
                 <meta name="description" content="Secure checkout for your rural marketplace needs." />
             </Helmet>
 
             <style>{`
-                /* ─── Tokens ─── */
+                /* ── Tokens ── */
                 :root {
-                    --maroon: #721a61;
-                    --maroon-dark: #561249;
-                    --gold: #ffc200;
-                    --surface: #ffffff;
-                    --bg: #f8f0f6;
-                    --border: #e8d5e4;
-                    --text-muted: #6b7280;
-                    --danger: #dc2626;
-                    --success: #16a34a;
-                    --radius: 8px;
+                    --maroon:      #721a61;
+                    --maroon-dk:   #561249;
+                    --gold:        #ffc200;
+                    --surface:     #ffffff;
+                    --bg:          #f8f0f6;
+                    --border:      #e8d5e4;
+                    --muted:       #6b7280;
+                    --success:     #16a34a;
+                    --radius:      8px;
+                    --radius-lg:   12px;
                 }
 
-                /* ─── Skeleton loader ─── */
-                .skeleton {
-                    background: linear-gradient(90deg, #f0e8ee 25%, #e8d8e4 50%, #f0e8ee 75%);
+                /* ── Skeleton ── */
+                .c-skeleton {
+                    border-radius: 4px;
+                    background: linear-gradient(90deg,#f0e8ee 25%,#e8d8e4 50%,#f0e8ee 75%);
+                    background-size: 200% 100%;
+                    animation: shimmer 1.4s infinite;
+                }
+                .c-skeleton-card {
+                    display: flex; gap: 12px; align-items: flex-start;
+                    background: var(--surface);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius);
+                    padding: 12px;
+                }
+                .c-skeleton-thumb {
+                    width: 70px; height: 70px; flex-shrink: 0;
+                    border-radius: 6px;
+                    background: linear-gradient(90deg,#f0e8ee 25%,#e8d8e4 50%,#f0e8ee 75%);
                     background-size: 200% 100%;
                     animation: shimmer 1.4s infinite;
                 }
                 @keyframes shimmer {
-                    0% { background-position: 200% 0; }
+                    0%   { background-position: 200% 0; }
                     100% { background-position: -200% 0; }
                 }
 
-                /* ─── Header ─── */
-                .cart-header {
+                /* ── Header ── */
+                .c-header {
                     background: var(--maroon);
                     color: white;
-                    padding: 12px 0;
-                    position: sticky;
-                    top: 0;
-                    z-index: 1000;
+                    padding: 10px 0;
+                    position: sticky; top: 0; z-index: 1000;
                     border-bottom: 3px solid var(--gold);
-                    box-shadow: 0 2px 8px rgba(114,26,97,0.3);
+                    box-shadow: 0 2px 8px rgba(114,26,97,.3);
+                }
+                .c-header-inner {
+                    max-width: 1200px; margin: 0 auto;
+                    padding: 0 16px;
+                    display: flex; align-items: center; gap: 12px;
+                }
+                .c-back-btn {
+                    background: none; border: none; color: white;
+                    padding: 4px; display: flex; align-items: center;
+                    cursor: pointer;
+                }
+                .c-header-title { font-size: 1rem; font-weight: 700; margin: 0; }
+                .c-header-badge {
+                    background: rgba(255,255,255,.2); color: white;
+                    font-size: 0.68rem; font-weight: 600;
+                    padding: 2px 8px; border-radius: 20px;
+                    margin-left: 6px;
                 }
 
-                /* ─── Address bar ─── */
-                .address-bar {
+                /* ── Layout ── */
+                .c-layout {
+                    max-width: 1200px; margin: 0 auto;
+                    padding: 14px 16px 0;
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 14px;
+                }
+                @media (min-width: 900px) {
+                    .c-layout {
+                        grid-template-columns: 1fr 340px;
+                        align-items: start;
+                        padding: 20px 24px 0;
+                    }
+                }
+                @media (min-width: 1100px) {
+                    .c-layout { grid-template-columns: 1fr 360px; }
+                }
+
+                /* ── Address bar ── */
+                .c-addr-bar {
                     background: var(--surface);
-                    padding: 14px 16px;
                     border: 1px solid var(--border);
                     border-left: 4px solid var(--maroon);
-                    margin-bottom: 14px;
                     border-radius: var(--radius);
-                    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-                }
-
-                /* ─── Cart item ─── */
-                .cart-item-card {
-                    background: var(--surface);
-                    padding: 16px;
-                    border-radius: var(--radius);
-                    border: 1px solid var(--border);
+                    padding: 12px 14px;
+                    display: flex; align-items: center;
+                    justify-content: space-between; gap: 10px;
                     margin-bottom: 10px;
-                    display: flex;
-                    gap: 14px;
-                    transition: box-shadow 0.2s;
                 }
-                .cart-item-card:hover { box-shadow: 0 4px 12px rgba(114,26,97,0.1); }
+                .c-addr-label {
+                    font-size: 9px; text-transform: uppercase;
+                    font-weight: 700; letter-spacing: .5px;
+                    color: var(--muted); display: block;
+                }
+                .c-addr-name {
+                    font-weight: 700; font-size: 0.82rem;
+                    color: #111; display: block;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                    max-width: 220px;
+                }
+                @media (min-width: 500px) { .c-addr-name { max-width: 340px; } }
+                @media (min-width: 900px) { .c-addr-name { max-width: 400px; } }
 
-                .item-img-box {
-                    width: 90px; height: 90px;
-                    flex-shrink: 0;
-                    border-radius: 6px;
-                    overflow: hidden;
-                    background: #fafafa;
-                    border: 1px solid #eee;
+                .c-addr-city {
+                    font-size: 0.72rem; color: var(--muted);
                 }
-                .item-img-box img { width: 100%; height: 100%; object-fit: contain; }
-
-                /* ─── Qty control ─── */
-                .qty-control {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 0;
-                    border: 1px solid var(--border);
-                    border-radius: 4px;
-                    overflow: hidden;
-                    margin-top: 8px;
+                .c-addr-warning {
+                    font-size: 0.78rem; font-weight: 700; color: #dc2626;
                 }
-                .qty-btn {
-                    background: #f8f0f6;
-                    border: none;
+                .c-change-btn {
+                    background: none;
+                    border: 1.5px solid var(--maroon);
                     color: var(--maroon);
-                    width: 30px; height: 30px;
-                    display: flex; align-items: center; justify-content: center;
-                    transition: background 0.15s;
+                    font-weight: 700; font-size: 0.7rem;
+                    padding: 4px 10px; border-radius: 4px;
+                    white-space: nowrap; cursor: pointer;
+                    flex-shrink: 0;
+                    transition: background .15s;
                 }
-                .qty-btn:hover:not(:disabled) { background: #eeddea; }
-                .qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-                .qty-value {
-                    width: 34px; text-align: center;
-                    font-weight: 700; font-size: 0.875rem;
+                .c-change-btn:hover { background: #fdf5fb; }
+
+                /* ── Cart item card ── */
+                .c-item-card {
+                    background: var(--surface);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius);
+                    padding: 12px;
+                    display: flex; gap: 12px;
+                    align-items: flex-start;
+                    margin-bottom: 8px;
+                    transition: box-shadow .2s;
+                }
+                .c-item-card:hover { box-shadow: 0 3px 10px rgba(114,26,97,.08); }
+
+                .c-img-box {
+                    flex-shrink: 0;
+                    width: 72px; height: 72px;
+                    border-radius: 6px; overflow: hidden;
+                    background: #fafafa; border: 1px solid #eee;
+                }
+                @media (min-width: 500px) {
+                    .c-img-box { width: 82px; height: 82px; }
+                }
+                @media (min-width: 768px) {
+                    .c-img-box { width: 90px; height: 90px; }
+                    .c-item-card { padding: 14px; gap: 14px; }
+                }
+                .c-img-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+                .c-item-name {
+                    font-size: 0.82rem; font-weight: 700; color: #111;
+                    margin: 0 0 4px; line-height: 1.3;
+                    display: -webkit-box; -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical; overflow: hidden;
+                }
+                @media (min-width: 500px) { .c-item-name { font-size: 0.88rem; } }
+
+                .c-price-row {
+                    display: flex; align-items: center;
+                    flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+                }
+                .c-price-main {
+                    font-size: 1rem; font-weight: 700; color: #111;
+                }
+                .c-price-mrp {
+                    font-size: 0.75rem; color: var(--muted);
+                    text-decoration: line-through;
+                }
+                .c-off-badge {
+                    background: #dcfce7; color: #15803d;
+                    font-size: 0.65rem; font-weight: 700;
+                    padding: 1px 7px; border-radius: 20px;
+                }
+
+                /* ── Qty control ── */
+                .c-qty {
+                    display: inline-flex; align-items: center;
+                    border: 1px solid var(--border); border-radius: 4px;
+                    overflow: hidden;
+                }
+                .c-qty-btn {
+                    background: #f8f0f6; border: none;
+                    color: var(--maroon);
+                    width: 28px; height: 28px;
+                    display: flex; align-items: center; justify-content: center;
+                    cursor: pointer; transition: background .15s;
+                    flex-shrink: 0;
+                }
+                .c-qty-btn:hover:not(:disabled) { background: #eedde9; }
+                .c-qty-btn:disabled { opacity: .4; cursor: not-allowed; }
+                .c-qty-val {
+                    width: 32px; text-align: center;
+                    font-weight: 700; font-size: 0.85rem;
                     border-left: 1px solid var(--border);
                     border-right: 1px solid var(--border);
-                    background: white;
-                    line-height: 30px;
+                    background: white; line-height: 28px;
+                    user-select: none;
                 }
 
-                /* ─── Price summary ─── */
-                .price-details {
+                .c-remove-btn {
+                    background: none; border: none; padding: 0;
+                    color: #dc2626; cursor: pointer;
+                    font-size: 0.72rem; font-weight: 700;
+                    display: flex; align-items: center; gap: 4px;
+                    margin-top: 6px;
+                    transition: opacity .15s;
+                }
+                .c-remove-btn:hover { opacity: .75; }
+
+                /* ── Bottom row of item (qty + remove, inline on wider screens) ── */
+                .c-item-actions {
+                    display: flex; align-items: center;
+                    gap: 14px; flex-wrap: wrap;
+                }
+
+                /* ── Empty state ── */
+                .c-empty {
                     background: var(--surface);
-                    padding: 20px;
-                    border-radius: var(--radius);
                     border: 1px solid var(--border);
-                    position: sticky;
-                    top: 80px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                    border-radius: var(--radius-lg);
+                    padding: 40px 20px; text-align: center;
                 }
-                .btn-place-order {
-                    background: var(--maroon);
-                    color: white;
-                    border: none;
-                    padding: 13px;
-                    font-weight: 700;
-                    font-size: 0.95rem;
-                    border-radius: var(--radius);
-                    width: 100%;
-                    transition: background 0.2s, transform 0.1s;
-                    letter-spacing: 0.3px;
+                .c-empty-icon { opacity: .2; color: var(--maroon); margin-bottom: 14px; }
+                .c-empty-title { font-size: 1rem; font-weight: 700; color: #111; margin: 0 0 6px; }
+                .c-empty-sub { font-size: 0.82rem; color: var(--muted); margin: 0 0 20px; }
+                .c-shop-btn {
+                    background: var(--maroon); color: white;
+                    border: none; padding: 10px 24px;
+                    font-weight: 700; font-size: 0.85rem;
+                    border-radius: var(--radius); cursor: pointer;
+                    display: inline-flex; align-items: center; gap: 6px;
+                    transition: background .2s;
                 }
-                .btn-place-order:hover:not(:disabled) {
-                    background: var(--maroon-dark);
-                    transform: translateY(-1px);
-                }
-                .btn-place-order:disabled { opacity: 0.65; cursor: not-allowed; }
+                .c-shop-btn:hover { background: var(--maroon-dk); }
 
-                /* ─── Address modal ─── */
-                .address-option {
-                    border: 1.5px solid var(--border);
-                    cursor: pointer;
-                    transition: border-color 0.15s, background 0.15s;
-                    border-radius: 6px;
-                }
-                .address-option:hover { border-color: var(--maroon); background: #fdf5fb; }
-                .address-option.selected { border-color: var(--maroon); background: #fdf5fb; }
-
-                /* ─── Mobile footer ─── */
-                .mobile-sticky-footer {
-                    position: fixed;
-                    bottom: 0; left: 0; right: 0;
+                /* ── Summary panel (desktop sidebar) ── */
+                .c-summary-panel {
                     background: var(--surface);
-                    padding: 10px 16px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    box-shadow: 0 -3px 12px rgba(0,0,0,0.1);
-                    z-index: 1001;
-                    border-top: 2px solid var(--gold);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius-lg);
+                    padding: 18px;
+                    position: sticky; top: 70px;
+                }
+                .c-summary-title {
+                    font-size: 0.9rem; font-weight: 700; color: #111;
+                    padding-bottom: 12px;
+                    border-bottom: 1px solid var(--border);
+                    margin-bottom: 12px;
+                }
+                .c-summary-row {
+                    display: flex; justify-content: space-between;
+                    font-size: 0.8rem; color: var(--muted);
+                    margin-bottom: 8px;
+                }
+                .c-summary-strike { text-decoration: line-through; }
+                .c-summary-green { color: #16a34a; font-weight: 600; }
+                .c-summary-total-row {
+                    display: flex; justify-content: space-between;
+                    font-size: 1rem; font-weight: 700; color: #111;
+                    border-top: 1px solid var(--border);
+                    padding-top: 12px; margin: 4px 0 14px;
+                }
+                .c-total-amt { color: var(--maroon); }
+
+                /* ── Compact summary (mobile footer) ── */
+                .c-summary-compact {
+                    /* no visual container — just used as a logic grouping */
                 }
 
-                /* ─── Utility ─── */
-                .text-maroon { color: var(--maroon); }
-                .savings-badge {
-                    background: #dcfce7;
-                    color: var(--success);
-                    font-size: 0.7rem;
-                    font-weight: 700;
-                    padding: 2px 8px;
-                    border-radius: 20px;
+                .c-savings-pill {
+                    background: #dcfce7; color: #15803d;
+                    font-size: 0.72rem; font-weight: 700;
+                    padding: 6px 12px; border-radius: 20px;
+                    text-align: center; margin-bottom: 14px;
+                    display: flex; align-items: center;
+                    justify-content: center; gap: 5px;
+                }
+
+                /* ── Place order button ── */
+                .c-place-btn {
+                    width: 100%; background: var(--maroon); color: white;
+                    border: none; border-radius: var(--radius);
+                    padding: 12px; font-weight: 700; font-size: 0.9rem;
+                    cursor: pointer; letter-spacing: .3px;
+                    transition: background .2s, transform .1s;
+                }
+                .c-place-btn:hover:not(:disabled) {
+                    background: var(--maroon-dk); transform: translateY(-1px);
+                }
+                .c-place-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+                .c-secure-note {
+                    font-size: 0.72rem; color: var(--muted); text-align: center;
+                    display: flex; align-items: center; justify-content: center;
+                    gap: 4px; margin: 10px 0 0;
+                }
+
+                /* ── Spinner ── */
+                .c-spinner {
+                    width: 15px; height: 15px;
+                    border: 2px solid rgba(255,255,255,.4);
+                    border-top-color: white;
+                    border-radius: 50%;
+                    animation: spin .7s linear infinite;
                     display: inline-block;
                 }
+                @keyframes spin { to { transform: rotate(360deg); } }
 
-                @media (max-width: 768px) {
-                    .cart-item-card { padding: 12px; gap: 10px; }
-                    .item-img-box { width: 75px; height: 75px; }
+                /* ── Mobile sticky footer ── */
+                .c-mob-footer {
+                    display: none;
+                    position: fixed; bottom: 0; left: 0; right: 0;
+                    background: var(--surface);
+                    border-top: 2px solid var(--gold);
+                    box-shadow: 0 -3px 12px rgba(0,0,0,.1);
+                    z-index: 1001;
+                    padding: 10px 16px;
+                    align-items: center; justify-content: space-between; gap: 12px;
                 }
+                @media (max-width: 899px) {
+                    .c-mob-footer { display: flex; }
+                    .c-desktop-summary { display: none !important; }
+                    main { padding-bottom: 80px !important; }
+                }
+                .c-mob-price { font-size: 1.1rem; font-weight: 700; color: #111; }
+                .c-mob-sub   { font-size: 0.68rem; color: #16a34a; font-weight: 600; }
+
+                /* Tablet adjustments */
+                @media (min-width: 600px) and (max-width: 899px) {
+                    .c-layout { padding: 16px 20px 0; }
+                    .c-item-card { padding: 14px; gap: 14px; }
+                    .c-item-name { font-size: 0.9rem; }
+                    .c-price-main { font-size: 1.05rem; }
+                }
+
+                /* ── Address Modal ── */
+                .c-modal-overlay {
+                    position: fixed; inset: 0;
+                    background: rgba(0,0,0,.65);
+                    z-index: 2000;
+                    display: flex; align-items: flex-end; justify-content: center;
+                }
+                @media (min-width: 500px) {
+                    .c-modal-overlay { align-items: center; }
+                }
+                .c-modal {
+                    background: var(--surface);
+                    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+                    width: 100%; max-width: 480px;
+                    max-height: 80vh; overflow-y: auto;
+                    padding: 20px 16px;
+                }
+                @media (min-width: 500px) {
+                    .c-modal { border-radius: var(--radius-lg); }
+                }
+                .c-modal-header {
+                    display: flex; align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 16px;
+                    padding-bottom: 12px;
+                    border-bottom: 1.5px solid #f0e0ec;
+                }
+                .c-modal-title {
+                    font-size: 0.9rem; font-weight: 700;
+                    color: var(--maroon);
+                    display: flex; align-items: center; gap: 6px;
+                }
+                .c-close-btn {
+                    background: none; border: none; cursor: pointer;
+                    color: var(--muted); padding: 2px;
+                    display: flex; align-items: center;
+                }
+                .c-addr-option {
+                    border: 1.5px solid var(--border);
+                    border-radius: 6px; padding: 10px 12px;
+                    margin-bottom: 8px; cursor: pointer;
+                    transition: border-color .15s, background .15s;
+                }
+                .c-addr-option:hover { border-color: var(--maroon); background: #fdf5fb; }
+                .c-addr-selected { border-color: var(--maroon) !important; background: #fdf5fb !important; }
+                .c-addr-full { font-weight: 700; font-size: 0.82rem; color: #111; }
+                .c-addr-sub  { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+                .c-add-addr-btn {
+                    width: 100%; background: none;
+                    border: 1.5px dashed var(--maroon);
+                    color: var(--maroon); font-weight: 700;
+                    font-size: 0.8rem; padding: 10px;
+                    border-radius: 6px; cursor: pointer;
+                    margin-top: 6px; transition: background .15s;
+                }
+                .c-add-addr-btn:hover { background: #fdf5fb; }
+
+                /* ── Misc ── */
+                * { box-sizing: border-box; }
             `}</style>
 
             {/* ── Header ── */}
-            <header className="cart-header">
-                <div className="container d-flex align-items-center">
-                    <button onClick={() => navigate(-1)} className="btn text-white p-0 me-3" aria-label="Go back">
-                        <ArrowLeft size={22} />
+            <header className="c-header">
+                <div className="c-header-inner">
+                    <button onClick={() => navigate(-1)} className="c-back-btn" aria-label="Go back">
+                        <ArrowLeft size={21} />
                     </button>
-                    <h1 className="h6 mb-0 fw-bold">
+                    <h1 className="c-header-title">
                         My Cart
                         {cartItems.length > 0 && (
-                            <span className="ms-2 badge rounded-pill" style={{ background: 'rgba(255,255,255,0.2)', fontSize: '0.7rem' }}>
-                                {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
-                            </span>
+                            <span className="c-header-badge">{cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}</span>
                         )}
                     </h1>
                 </div>
             </header>
 
-            <div className="container mt-4">
-                <div className="row g-4">
+            {/* ── Main Layout ── */}
+            <div className="c-layout">
 
-                    {/* ── Left: Items + Address ── */}
-                    <div className="col-lg-8">
+                {/* ── LEFT: Address + Items ── */}
+                <section>
 
-                        {/* Delivery Address */}
-                        <div className="address-bar d-flex justify-content-between align-items-center gap-2">
-                            <div className="d-flex align-items-start gap-2 flex-grow-1 min-w-0">
-                                <MapPin size={18} className="text-maroon mt-1 flex-shrink-0" />
-                                <div className="min-w-0">
-                                    {loadingAddresses ? (
-                                        <div className="skeleton" style={{ height: 14, width: 200, borderRadius: 4 }} />
-                                    ) : selectedAddress ? (
-                                        <>
-                                            <span className="text-muted d-block" style={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px' }}>
-                                                Delivering to
-                                            </span>
-                                            <span className="fw-bold small text-dark d-block text-truncate">{selectedAddress.FullAddress}</span>
-                                            <span className="text-muted" style={{ fontSize: '11px' }}>
-                                                {selectedAddress.City}, {selectedAddress.Pincode}
-                                            </span>
-                                        </>
-                                    ) : (
-                                        <span className="small fw-bold text-danger">⚠ Select a delivery address to continue</span>
-                                    )}
-                                </div>
+                    {/* Address bar */}
+                    <div className="c-addr-bar">
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flex: 1, minWidth: 0 }}>
+                            <MapPin size={16} style={{ color: 'var(--maroon)', marginTop: 2, flexShrink: 0 }} />
+                            <div style={{ minWidth: 0 }}>
+                                {loadingAddresses ? (
+                                    <div className="c-skeleton" style={{ height: 13, width: 180 }} />
+                                ) : selectedAddress ? (
+                                    <>
+                                        <span className="c-addr-label">Delivering to</span>
+                                        <span className="c-addr-name">{selectedAddress.FullAddress}</span>
+                                        <span className="c-addr-city">{selectedAddress.City}, {selectedAddress.Pincode}</span>
+                                    </>
+                                ) : (
+                                    <span className="c-addr-warning">⚠ Select a delivery address</span>
+                                )}
                             </div>
-                            <button
-                                className="btn btn-sm fw-bold px-3 flex-shrink-0"
-                                style={{ color: 'var(--maroon)', border: '1.5px solid var(--maroon)', borderRadius: 4, fontSize: '0.75rem' }}
-                                onClick={() => setShowAddressModal(true)}
-                            >
-                                {addresses.length > 0 ? 'CHANGE' : 'ADD'}
-                            </button>
                         </div>
+                        <button className="c-change-btn" onClick={() => setShowAddressModal(true)}>
+                            {addresses.length > 0 ? 'CHANGE' : 'ADD'}
+                        </button>
+                    </div>
 
-                        {/* Cart Items */}
-                        <div className="mb-5">
-                            {loadingAddresses && cartItems.length === 0 ? (
-                                <CartSkeleton />
-                            ) : cartItems.length > 0 ? (
-                                cartItems.map(item => {
-                                    const itemId = getItemId(item);
-                                    const name = item.itemName ?? item.ItemName ?? 'Product';
-                                    const imgSrc = resolveMediaUrl(item.mediaList ?? item.MediaList, IMAGE_BASE_URL);
-                                    const lineTotal = item.price * item.quantity;
-                                    const lineMrp = Math.round(item.price * 1.2 * item.quantity);
+                    {/* Cart items */}
+                    {loadingAddresses && cartItems.length === 0 ? (
+                        <CartSkeleton />
+                    ) : cartItems.length > 0 ? (
+                        cartItems.map(item => {
+                            const itemId   = getItemId(item);
+                            const name     = item.itemName ?? item.ItemName ?? 'Product';
+                            const imgSrc   = resolveMediaUrl(item.mediaList ?? item.MediaList, IMAGE_BASE_URL);
+                            const lineTotal = item.price * item.quantity;
+                            const lineMrp   = Math.round(item.price * 1.2 * item.quantity);
 
-                                    return (
-                                        <article className="cart-item-card shadow-sm" key={itemId}>
-                                            <div className="item-img-box">
-                                                <img
-                                                    src={imgSrc}
-                                                    alt={name}
-                                                    loading="lazy"
-                                                    onError={e => { e.target.src = 'https://placehold.co/200?text=No+Image'; }}
-                                                />
-                                            </div>
+                            return (
+                                <article className="c-item-card" key={itemId}>
+                                    <div className="c-img-box">
+                                        <img
+                                            src={imgSrc} alt={name} loading="lazy"
+                                            onError={e => { e.target.src = 'https://placehold.co/200?text=No+Image'; }}
+                                        />
+                                    </div>
 
-                                            <div className="flex-grow-1 min-w-0">
-                                                <h2 className="h6 mb-1 fw-bold text-dark text-truncate">{name}</h2>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <h2 className="c-item-name">{name}</h2>
 
-                                                <div className="d-flex align-items-center gap-2 mt-1 flex-wrap">
-                                                    <span className="fw-bold text-dark" style={{ fontSize: '1.1rem' }}>₹{lineTotal}</span>
-                                                    <span className="text-muted text-decoration-line-through" style={{ fontSize: '0.8rem' }}>₹{lineMrp}</span>
-                                                    <span className="savings-badge">20% off</span>
-                                                </div>
+                                        <div className="c-price-row">
+                                            <span className="c-price-main">₹{lineTotal}</span>
+                                            <span className="c-price-mrp">₹{lineMrp}</span>
+                                            <span className="c-off-badge">20% off</span>
+                                        </div>
 
-                                                <div className="qty-control">
-                                                    <button
-                                                        className="qty-btn"
-                                                        onClick={() => updateQuantity(itemId, item.quantity - 1)}
-                                                        disabled={item.quantity <= 1}
-                                                        aria-label="Decrease quantity"
-                                                    >
-                                                        <Minus size={14} />
-                                                    </button>
-                                                    <span className="qty-value">{item.quantity}</span>
-                                                    <button
-                                                        className="qty-btn"
-                                                        onClick={() => updateQuantity(itemId, item.quantity + 1)}
-                                                        aria-label="Increase quantity"
-                                                    >
-                                                        <Plus size={14} />
-                                                    </button>
-                                                </div>
-
+                                        <div className="c-item-actions">
+                                            <div className="c-qty">
                                                 <button
-                                                    className="btn text-danger p-0 mt-2 small fw-bold d-flex align-items-center gap-1"
-                                                    onClick={() => removeFromCart(itemId)}
-                                                    style={{ fontSize: '0.78rem' }}
+                                                    className="c-qty-btn"
+                                                    onClick={() => updateQuantity(itemId, item.quantity - 1)}
+                                                    disabled={item.quantity <= 1}
+                                                    aria-label="Decrease quantity"
                                                 >
-                                                    <Trash2 size={13} /> Remove
+                                                    <Minus size={13} />
+                                                </button>
+                                                <span className="c-qty-val">{item.quantity}</span>
+                                                <button
+                                                    className="c-qty-btn"
+                                                    onClick={() => updateQuantity(itemId, item.quantity + 1)}
+                                                    aria-label="Increase quantity"
+                                                >
+                                                    <Plus size={13} />
                                                 </button>
                                             </div>
-                                        </article>
-                                    );
-                                })
-                            ) : (
-                                <div className="p-5 text-center bg-white rounded shadow-sm">
-                                    <ShoppingBag size={48} style={{ color: 'var(--maroon)', opacity: 0.25 }} className="mb-3" />
-                                    <h5 className="fw-bold text-dark">Your cart is empty</h5>
-                                    <p className="text-muted small mb-4">Browse SathiMarket and add fresh products from local farmers.</p>
-                                    <button
-                                        className="btn text-white px-4 py-2 fw-bold"
-                                        style={{ background: 'var(--maroon)', borderRadius: 6 }}
-                                        onClick={() => navigate('/sathi-market')}
-                                    >
-                                        <Package size={16} className="me-2" /> Shop Now
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
 
-                    {/* ── Right: Price Summary (desktop) ── */}
-                    <div className="col-lg-4 d-none d-lg-block">
-                        <div className="price-details">
-                            <h3 className="h6 fw-bold border-bottom pb-3 mb-3">Order Summary</h3>
-
-                            <div className="d-flex justify-content-between mb-2 small">
-                                <span className="text-muted">MRP Total</span>
-                                <span className="text-decoration-line-through text-muted">₹{total + savings}</span>
-                            </div>
-                            <div className="d-flex justify-content-between mb-2 small text-success fw-bold">
-                                <span>Discount</span>
-                                <span>- ₹{savings}</span>
-                            </div>
-                            <div className="d-flex justify-content-between mb-2 small text-success">
-                                <span>Delivery</span>
-                                <span className="fw-bold">FREE</span>
-                            </div>
-
-                            <div className="d-flex justify-content-between border-top pt-3 fw-bold mb-4" style={{ fontSize: '1.1rem' }}>
-                                <span>Total Payable</span>
-                                <span className="text-maroon">₹{total}</span>
-                            </div>
-
-                            {savings > 0 && (
-                                <div className="savings-badge w-100 text-center mb-4 py-1" style={{ fontSize: '0.8rem' }}>
-                                    🎉 You're saving ₹{savings} on this order!
-                                </div>
-                            )}
-
-                            <button
-                                className="btn-place-order"
-                                onClick={handleCheckout}
-                                disabled={isPlacingOrder || cartItems.length === 0}
-                            >
-                                {isPlacingOrder ? (
-                                    <span className="d-flex align-items-center justify-content-center gap-2">
-                                        <span className="spinner-border spinner-border-sm" /> Processing...
-                                    </span>
-                                ) : 'Place My Order'}
+                                            <button
+                                                className="c-remove-btn"
+                                                onClick={() => removeFromCart(itemId)}
+                                                aria-label={`Remove ${name}`}
+                                            >
+                                                <Trash2 size={12} /> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </article>
+                            );
+                        })
+                    ) : (
+                        <div className="c-empty">
+                            <div className="c-empty-icon"><ShoppingBag size={44} /></div>
+                            <h5 className="c-empty-title">Your cart is empty</h5>
+                            <p className="c-empty-sub">Browse SathiMarket and add fresh products from local farmers.</p>
+                            <button className="c-shop-btn" onClick={() => navigate('/sathi-market')}>
+                                <Package size={15} /> Shop Now
                             </button>
-
-                            <p className="small text-center text-muted mt-3 d-flex align-items-center justify-content-center gap-1">
-                                <ShieldCheck size={14} className="text-success" /> Secure Checkout
-                            </p>
                         </div>
-                    </div>
-                </div>
+                    )}
+                </section>
+
+                {/* ── RIGHT: Desktop Summary Panel ── */}
+                {cartItems.length > 0 && (
+                    <aside className="c-desktop-summary">
+                        <OrderSummary
+                            total={total} savings={savings}
+                            cartItems={cartItems}
+                            isPlacingOrder={isPlacingOrder}
+                            onCheckout={handleCheckout}
+                            compact={false}
+                        />
+                    </aside>
+                )}
             </div>
 
             {/* ── Mobile sticky footer ── */}
             {cartItems.length > 0 && (
-                <div className="mobile-sticky-footer d-lg-none">
+                <div className="c-mob-footer">
                     <div>
-                        <div className="fw-bold text-dark" style={{ fontSize: '1.2rem' }}>₹{total}</div>
-                        <div className="text-success fw-bold" style={{ fontSize: '10px' }}>FREE delivery · Save ₹{savings}</div>
+                        <div className="c-mob-price">₹{total}</div>
+                        <div className="c-mob-sub">FREE delivery · Save ₹{savings}</div>
                     </div>
                     <button
-                        className="btn text-white px-4 py-2 fw-bold"
-                        style={{ background: 'var(--maroon)', borderRadius: 6 }}
+                        className="c-place-btn"
+                        style={{ width: 'auto', padding: '11px 22px', fontSize: '0.85rem' }}
                         onClick={handleCheckout}
                         disabled={isPlacingOrder}
                     >
-                        {isPlacingOrder ? 'Wait...' : 'Place Order →'}
+                        {isPlacingOrder
+                            ? <span style={{ display:'flex',alignItems:'center',gap:6 }}><span className="c-spinner"/>Wait...</span>
+                            : 'Place Order →'}
                     </button>
                 </div>
             )}
@@ -579,51 +794,45 @@ const Cart = () => {
             {/* ── Address Modal ── */}
             {showAddressModal && (
                 <div
-                    className="modal fade show d-block"
-                    tabIndex="-1"
-                    style={{ background: 'rgba(0,0,0,0.65)', zIndex: 2000 }}
+                    className="c-modal-overlay"
                     onClick={e => { if (e.target === e.currentTarget) setShowAddressModal(false); }}
                 >
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 12 }}>
-                            <div className="modal-header pb-0" style={{ borderBottom: '2px solid #f0e0ec' }}>
-                                <h6 className="modal-title fw-bold text-maroon d-flex align-items-center gap-2">
-                                    <MapPin size={16} /> Select Delivery Address
-                                </h6>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setShowAddressModal(false)}
-                                    aria-label="Close"
-                                />
+                    <div className="c-modal">
+                        <div className="c-modal-header">
+                            <div className="c-modal-title">
+                                <MapPin size={15} /> Select Delivery Address
                             </div>
-                            <div className="modal-body">
-                                {loadingAddresses ? (
-                                    <div className="text-center py-3">
-                                        <div className="spinner-border spinner-border-sm text-maroon" />
-                                    </div>
-                                ) : addresses.length > 0 ? (
-                                    addresses.map(addr => (
-                                        <AddressCard
-                                            key={addr.Id}
-                                            addr={addr}
-                                            isSelected={selectedAddress?.Id === addr.Id}
-                                            onSelect={a => { setSelectedAddress(a); setShowAddressModal(false); }}
-                                        />
-                                    ))
-                                ) : (
-                                    <p className="text-center py-3 text-muted small">No saved addresses found.</p>
-                                )}
-
-                                <button
-                                    className="btn w-100 py-2 mt-2 small fw-bold"
-                                    style={{ color: 'var(--maroon)', border: '1.5px dashed var(--maroon)', borderRadius: 6 }}
-                                    onClick={() => { setShowAddressModal(false); navigate('/manage-addresses'); }}
-                                >
-                                    + Add New Address
-                                </button>
-                            </div>
+                            <button className="c-close-btn" onClick={() => setShowAddressModal(false)} aria-label="Close">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
                         </div>
+
+                        {loadingAddresses ? (
+                            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                                <span className="c-spinner" style={{ borderTopColor: 'var(--maroon)', borderColor: '#e8d5e4' }} />
+                            </div>
+                        ) : addresses.length > 0 ? (
+                            addresses.map(addr => (
+                                <AddressCard
+                                    key={addr.Id} addr={addr}
+                                    isSelected={selectedAddress?.Id === addr.Id}
+                                    onSelect={a => { setSelectedAddress(a); setShowAddressModal(false); }}
+                                />
+                            ))
+                        ) : (
+                            <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '0.82rem', padding: '16px 0' }}>
+                                No saved addresses found.
+                            </p>
+                        )}
+
+                        <button
+                            className="c-add-addr-btn"
+                            onClick={() => { setShowAddressModal(false); navigate('/manage-addresses'); }}
+                        >
+                            + Add New Address
+                        </button>
                     </div>
                 </div>
             )}
