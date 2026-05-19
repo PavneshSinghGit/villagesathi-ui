@@ -7,7 +7,7 @@ import {
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from 'react-toastify';
-import SathiLogo from "../assets/Images/sathi_market_logo.png";
+import SathiLogo from "../assets/Images/sathimarket.png";
 
 const SathiMarketNavbar = () => {
     const { cartItems, clearCart } = useCart();
@@ -66,12 +66,18 @@ const SathiMarketNavbar = () => {
                 /* LOGO */
                 .sm-logo-link { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
                 .sm-logo-img {
-                    height: 142px; width: auto; object-fit: contain;
+                    height: 68px; width: auto; object-fit: contain;
                     mix-blend-mode: lighten;
                     filter: drop-shadow(0 0 6px rgba(245,197,24,0.35));
                     transition: filter 0.3s;
                 }
                 .sm-logo-link:hover .sm-logo-img { filter: drop-shadow(0 0 14px rgba(245,197,24,0.65)); }
+                .sm2-brand{display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0}
+                .sm2-brand-logo{width:138px;height:38px;border-radius:9px;background:#fdf4fb;border:1.5px solid #f0d9ed;display:flex;align-items:center;justify-content:center;overflow:hidden}
+                .sm2-brand-logo img{width:130px;height:auto}
+                .sm2-brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.2rem;font-weight:700;color:#1a0a14;line-height:1}
+                .sm2-brand-name em{color:#8B1A6B;font-style:normal}
+                .sm2-brand-tag{font-size:9px;color:#a0879a;letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
 
                 /* ACTIONS */
                 .sm-actions { display: flex; align-items: center; gap: 10px; }
@@ -246,10 +252,15 @@ const SathiMarketNavbar = () => {
             <header className="sm-nav">
                 <div className="sm-nav-inner">
 
-                    {/* Logo */}
+
                     <Link to="/sathi-market" className="sm-logo-link" aria-label="SathiMarket Home">
                         <img src={SathiLogo} alt="SathiMarket" className="sm-logo-img" />
                     </Link>
+                    {/* <div className="sm2-brand" onClick={() => navigate('/sathi-market')} aria-label="SathiMarket Home">
+                        <div className="sm2-brand-logo">
+                            <img src={SathiLogo} alt="SathiMarket" />
+                        </div>
+                    </div> */}
 
                     {/* Desktop Actions */}
                     <div className="sm-actions">

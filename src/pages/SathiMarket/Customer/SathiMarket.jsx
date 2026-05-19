@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import axiosInstance from '../../../api/axiosInstance';
 import { toast } from 'react-toastify';
-import SathiLogo from "../../../assets/Images/smLogo.png";
+import SathiLogo from "../../../assets/Images/sathimarket.png";
 import {
     Search, Store, Building2, Smartphone, Stethoscope,
     ShoppingBag, Star, MapPin, ChevronRight, Sparkles,
@@ -205,8 +205,8 @@ const SathiMarket = () => {
                 .sm2-header{background:#fff;border-bottom:1px solid #ece9e4;position:sticky;top:0;z-index:200}
                 .sm2-header-inner{max-width:1320px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;gap:12px}
                 .sm2-brand{display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0}
-                .sm2-brand-logo{width:38px;height:38px;border-radius:9px;background:#fdf4fb;border:1.5px solid #f0d9ed;display:flex;align-items:center;justify-content:center;overflow:hidden}
-                .sm2-brand-logo img{width:30px;height:auto}
+                .sm2-brand-logo{width:138px;height:38px;border-radius:9px;background:#fdf4fb;border:1.5px solid #f0d9ed;display:flex;align-items:center;justify-content:center;overflow:hidden}
+                .sm2-brand-logo img{width:130px;height:auto}
                 .sm2-brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.2rem;font-weight:700;color:#1a0a14;line-height:1}
                 .sm2-brand-name em{color:#8B1A6B;font-style:normal}
                 .sm2-brand-tag{font-size:9px;color:#a0879a;letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
@@ -381,11 +381,7 @@ const SathiMarket = () => {
                     <div className="sm2-brand" onClick={() => navigate('/sathi-market')} aria-label="SathiMarket Home">
                         <div className="sm2-brand-logo">
                             <img src={SathiLogo} alt="SathiMarket" />
-                        </div>
-                        <div>
-                            <div className="sm2-brand-name">Sathi<em>Market</em></div>
-                            <div className="sm2-brand-tag">Shop Local</div>
-                        </div>
+                        </div>                       
                     </div>
 
                     <div className="sm2-search-shell">

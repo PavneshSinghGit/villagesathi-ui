@@ -21,31 +21,31 @@ import {
 ───────────────────────────────────────────── */
 
 const SM = {
-    bgDeep:      '#3D0030',
-    bgMid:       '#6B0F4A',
-    bgLight:     '#8C1560',
-    gold:        '#D4A017',
-    goldBright:  '#F5C518',
-    goldSoft:    'rgba(212,160,23,0.12)',
-    darkPanel:   '#1C1230',
-    pageBg:      '#F5F0FF',
-    purpleText:  '#5B2D8E',
-    purpleSoft:  '#EDE9FF',
-    white:       '#FFFFFF',
-    border:      'rgba(91,45,142,0.15)',
-    mutedText:   '#8B6FAE',
+    bgDeep: '#3D0030',
+    bgMid: '#6B0F4A',
+    bgLight: '#8C1560',
+    gold: '#D4A017',
+    goldBright: '#F5C518',
+    goldSoft: 'rgba(212,160,23,0.12)',
+    darkPanel: '#1C1230',
+    pageBg: '#F5F0FF',
+    purpleText: '#5B2D8E',
+    purpleSoft: '#EDE9FF',
+    white: '#FFFFFF',
+    border: 'rgba(91,45,142,0.15)',
+    mutedText: '#8B6FAE',
 };
 
 const ManageInventory = () => {
     const { user, isBusiness, loading } = useAuth();
     const navigate = useNavigate();
 
-    const [items, setItems]               = useState([]);
-    const [searchTerm, setSearchTerm]     = useState('');
-    const [newItem, setNewItem]           = useState({ itemName: '', price: '', itemDescription: '' });
+    const [items, setItems] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [newItem, setNewItem] = useState({ itemName: '', price: '', itemDescription: '' });
     const [selectedFiles, setSelectedFiles] = useState([]);
-    const [dataLoading, setDataLoading]   = useState(true);
-    const [submitting, setSubmitting]     = useState(false);
+    const [dataLoading, setDataLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
 
     const shopId = user?.shopId || user?.ShopId;
 
@@ -57,11 +57,11 @@ const ManageInventory = () => {
 
     const fetchItems = async () => {
         try {
-            const res  = await axiosInstance.get(`/ShopItems/GetByShop/${shopId}`);
+            const res = await axiosInstance.get(`/ShopItems/GetByShop/${shopId}`);
             const data = res.data?.Data || res.data || [];
             setItems(Array.isArray(data) ? data : []);
         } catch { toast.error('Failed to load inventory'); }
-        finally  { setDataLoading(false); }
+        finally { setDataLoading(false); }
     };
 
     const handleFileChange = (e) => {
@@ -93,12 +93,38 @@ const ManageInventory = () => {
     };
 
     const handleDeleteItem = async (itemId) => {
+
         if (!window.confirm('Confirm deletion of this product?')) return;
+
         try {
-            await axiosInstance.delete(`/ShopItems/DeleteItem/${itemId}`);
-            setItems(prev => prev.filter(item => item.itemID !== itemId));
-            toast.info('Product removed');
-        } catch { toast.error('Delete failed'); }
+
+            const response = await axiosInstance.post(
+                `/ShopItems/DeleteItem`,
+                { id: itemId },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.data?.success) {
+
+                setItems(prev =>
+                    prev.filter(item => item.itemID !== itemId)
+                );
+
+                toast.success(response.data.message);
+            }
+            else {
+                toast.error('Delete failed');
+            }
+
+        } catch (error) {
+
+            console.error(error);
+            toast.error('Delete failed');
+        }
     };
 
     const getMediaUrl = (url) => {
@@ -644,100 +670,126 @@ const ManageInventory = () => {
                                 </tr>
                             </thead>
                             <tbody className="inv-tbody">
-                                {filteredItems.length > 0 ? filteredItems.map(item => {
-                                    const imgUrl = item.mediaList?.length > 0
-                                        ? getMediaUrl(item.mediaList[0].mediaURL)
-                                        : null;
+                                {filteredItems.length > 0 ? (
+                                    filteredItems.map(item => {
+                                        const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_URL;
 
-                                    return (
-                                        <tr key={item.itemID}>
-                                            {/* Product */}
-                                            <td>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                    <div style={{ position: 'relative', flexShrink: 0 }}>
-                                                        {imgUrl ? (
-                                                            <img
-                                                                src={imgUrl}
-                                                                className="inv-thumb"
-                                                                alt={item.itemName}
-                                                                onError={e => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100?text=No+Img'; }}
-                                                            />
-                                                        ) : (
-                                                            <div className="inv-thumb-placeholder">
-                                                                <ImageIcon size={20} color={SM.mutedText} />
-                                                            </div>
-                                                        )}
-                                                        {item.mediaList?.length > 1 && (
-                                                            <div className="inv-media-count">
-                                                                +{item.mediaList.length - 1}
-                                                            </div>
-                                                        )}
+                                        // 1. Define the URL generator safely inside the map if it needs IMAGE_BASE_URL
+                                        const getMediaUrl = (mediaList) => {
+                                            const DEFAULT = 'https://placehold.co/400x400/f8f0f7/8B1A6B?text=No+Image';
+                                            if (!mediaList || mediaList.length === 0) return DEFAULT;
+
+                                            const primary = mediaList.find(m => m.isPrimary || m.IsPrimary) || mediaList[0];
+                                            let path = primary.mediaURL || primary.MediaURL;
+
+                                            if (!path) return DEFAULT;
+                                            if (path.startsWith('http')) return path;
+
+                                            path = path.replace(/\\/g, '/').replace(/^\/?wwwroot/i, '');
+                                            const cleanPath = path.startsWith('/') ? path : `/${path}`;
+                                            const cleanBase = IMAGE_BASE_URL?.endsWith('/') ? IMAGE_BASE_URL.slice(0, -1) : IMAGE_BASE_URL;
+
+                                            return `${cleanBase}${cleanPath}`;
+                                        };
+
+                                        // 2. Compute the URL to evaluate whether to render the <img> tag or the placeholder
+                                        const currentImgUrl = getMediaUrl(item.mediaList || item.MediaList);
+
+                                        return (
+                                            <tr key={item.itemID}>
+                                                {/* Product */}
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                        <div style={{ position: 'relative', flexShrink: 0 }}>
+                                                            {/* 3. Fixed the variable check here */}
+                                                            {currentImgUrl ? (
+                                                                <img height={80} width={80}
+                                                                    src={currentImgUrl}
+                                                                    alt={item.itemName || item.ItemName || 'Product'}
+                                                                    loading="lazy"
+                                                                    onError={e => {
+                                                                        e.target.onerror = null;
+                                                                        e.target.src = 'https://placehold.co/400x400/f8f0f7/8B1A6B?text=No+Image';
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <div className="inv-thumb-placeholder">
+                                                                    <ImageIcon size={20} color={SM.mutedText} />
+                                                                </div>
+                                                            )}
+                                                            {(item.mediaList?.length > 1 || item.MediaList?.length > 1) && (
+                                                                <div className="inv-media-count">
+                                                                    +{(item.mediaList?.length || item.MediaList?.length) - 1}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <p className="inv-item-name">{item.itemName}</p>
+                                                            <p className="inv-item-desc">
+                                                                <Info size={11} />
+                                                                {item.itemDescription || 'No description'}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="inv-item-name">{item.itemName}</p>
-                                                        <p className="inv-item-desc">
-                                                            <Info size={11} />
-                                                            {item.itemDescription || 'No description'}
-                                                        </p>
+                                                </td>
+
+                                                {/* Price */}
+                                                <td>
+                                                    <div className="inv-price">
+                                                        <IndianRupee size={14} color={SM.gold} />
+                                                        {item.price?.toLocaleString('en-IN')}
                                                     </div>
-                                                </div>
-                                            </td>
+                                                </td>
 
-                                            {/* Price */}
-                                            <td>
-                                                <div className="inv-price">
-                                                    <IndianRupee size={14} color={SM.gold} />
-                                                    {item.price?.toLocaleString('en-IN')}
-                                                </div>
-                                            </td>
+                                                {/* Status */}
+                                                <td>
+                                                    <span className={`inv-status ${item.isAvailable ? 'inv-status-live' : 'inv-status-oos'}`}>
+                                                        <span
+                                                            className="inv-status-dot"
+                                                            style={{ background: item.isAvailable ? '#22c55e' : '#94a3b8' }}
+                                                        />
+                                                        {item.isAvailable ? 'Live' : 'Out of Stock'}
+                                                    </span>
+                                                </td>
 
-                                            {/* Status */}
-                                            <td>
-                                                <span className={`inv-status ${item.isAvailable ? 'inv-status-live' : 'inv-status-oos'}`}>
-                                                    <span
-                                                        className="inv-status-dot"
-                                                        style={{ background: item.isAvailable ? '#22c55e' : '#94a3b8' }}
-                                                    />
-                                                    {item.isAvailable ? 'Live' : 'Out of Stock'}
-                                                </span>
-                                            </td>
-
-                                            {/* Actions */}
-                                            <td>
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                                    <div className="dropdown">
-                                                        <button
-                                                            className="inv-action-btn"
-                                                            type="button"
-                                                            data-bs-toggle="dropdown"
-                                                            aria-expanded="false"
-                                                        >
-                                                            <MoreVertical size={16} />
-                                                        </button>
-                                                        <ul className="dropdown-menu inv-dropdown-menu">
-                                                            <li>
-                                                                <button className="inv-dropdown-item">
-                                                                    <Eye size={15} /> View Details
-                                                                </button>
-                                                            </li>
-                                                            <li>
-                                                                <hr style={{ margin: '4px 8px', borderColor: SM.border }} />
-                                                            </li>
-                                                            <li>
-                                                                <button
-                                                                    className="inv-dropdown-item danger"
-                                                                    onClick={() => handleDeleteItem(item.itemID)}
-                                                                >
-                                                                    <Trash2 size={15} /> Delete Product
-                                                                </button>
-                                                            </li>
-                                                        </ul>
+                                                {/* Actions */}
+                                                <td>
+                                                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                        <div className="dropdown">
+                                                            <button
+                                                                className="inv-action-btn"
+                                                                type="button"
+                                                                data-bs-toggle="dropdown"
+                                                                aria-expanded="false"
+                                                            >
+                                                                <MoreVertical size={16} />
+                                                            </button>
+                                                            <ul className="dropdown-menu inv-dropdown-menu">
+                                                                <li>
+                                                                    <button className="inv-dropdown-item" type="button">
+                                                                        <Eye size={15} /> View Details
+                                                                    </button>
+                                                                </li>
+                                                                <li>
+                                                                    <hr style={{ margin: '4px 8px', borderColor: SM.border }} />
+                                                                </li>
+                                                                <li>
+                                                                    <button
+                                                                        className="inv-dropdown-item danger"
+                                                                        type="button"
+                                                                        onClick={() => handleDeleteItem(item.itemID)}
+                                                                    >
+                                                                        <Trash2 size={15} /> Delete Product
+                                                                    </button>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                }) : (
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
                                     <tr>
                                         <td colSpan="4">
                                             <div className="inv-empty">

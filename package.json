@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docs:auth-pdf": "node scripts/generate-sathimarket-auth-pdf.mjs",
+    "docs:api-pdf": "node scripts/generate-sathimarket-full-api-pdf.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

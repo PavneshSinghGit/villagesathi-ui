@@ -112,7 +112,7 @@ const ShopDetails = () => {
     );
 
     const shopName = shop?.shopName || 'Shop';
-    const shopCity = shop?.city || '';
+    const shopCity = shop?.shopAddress || '';
     const shopState = shop?.state || 'India';
 
     return (
@@ -383,6 +383,7 @@ const ShopDetails = () => {
                 <div className="sd-strip-inner">
                     <div className="sd-strip-avatar">{shopName.charAt(0).toUpperCase()}</div>
                     <span className="sd-strip-name">{shopName}</span>
+                     <span className="sd-strip-name">{shopCity}</span>
                     <div className="sd-strip-pills">
                         <span className="sd-strip-pill green">
                             <BadgeCheck size={9} /> Verified
